@@ -15,23 +15,18 @@ function getStartTime(schedules, duration) {
       return (((date2.getTime() - date1.getTime()) / 1000) / 60);
   };
   
-  let allSchedules = schedules.reduce((acc, schedulelist) => {
+  let combineSchedules = schedules.reduce((acc, schedulelist) => {
       let acc1 = schedulelist.reduce((acc1, s) => {        
-        if (calculateTimeDiffInMinute(s[0], s[1]) < 0) { 
-            return acc1;
+        if (calculateTimeDiffInMinute(s[0], s[1]) >= 0) { 
+          acc1.push(s);
         }
-        acc1.push(s);
         return acc1;
       }, []);
       return acc.concat(acc1);
-  }, []);
-  
-  allSchedules.sort((a,b) => {
+  }, [])
+  .sort((a,b) => {
       return calculateTimeDiffInMinute(b[0], a[0]);
-  });
-
-  // merge interval
-  let combineSchedules = allSchedules.reduce((acc, schedule) => {
+  }).reduce((acc, schedule) => {
       if (acc.length === 0) {
           acc.push(schedule);
       } else {
@@ -44,7 +39,7 @@ function getStartTime(schedules, duration) {
       }
       return acc;
   }, []);
-  
+      
   // find first available time or null  
   // check first scheduled time with 09:00
   if (calculateTimeDiffInMinute('09:00', combineSchedules[0][0]) >= duration) {
