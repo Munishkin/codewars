@@ -56,7 +56,6 @@ function getStartTime(schedules, duration) {
       
   return calculateTimeDiffInMinute(combineSchedules[combineSchedules.length - 1][1], '19:00') >= duration ? 
       combineSchedules[combineSchedules.length - 1][1] : null;
-  return null;
 }
 
 // Example from description
