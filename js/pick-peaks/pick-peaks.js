@@ -1,19 +1,15 @@
 function pickPeaks(arr){
   
-  let pos = [];
-  let peaks = [];
-  let sign = [''];
-  
   const INCREASE = '+';
   const DECREASE = '-';
   const SAME = '0';
-  
-  
+    
   // initialize sign array
   // for each i, i+1, compare arr[i] and arr[i+1]
   // if arr[i+1] > a[i], push + to sign array
   // if arr[i+1] < a[i], push - to sign array
   // push 0 because arr[i+1] = arr[i]
+  let sign = [''];
   for (let i = 0; i < arr.length - 1; i++) {
     if (arr[i] < arr[i+1]) {
       sign.push(INCREASE);
@@ -23,25 +19,27 @@ function pickPeaks(arr){
       sign.push(SAME);
     }
   }
-  console.log(sign);
-  
-  
-  // detect change from non-decreasing slope to non-increasing slope
-  // insert postion = pos arraylist
-  // insert value to peaks arraylist
-  let result = sign.reduce((acc, e, i, arr1) => {
-    //console.log(`${e}, ${i}`);
-    //console.log(arr)
-    if (i > 0 && i < arr1.length - 1 && arr1[i] === '+' && arr1[i+1] === '-') {
-      acc.pos.push(i);
-      acc.peaks.push(arr[i]);
-    }
-    return acc;
-  },{ pos:[], peaks:[]});
-  
+
+  let result = { pos:[], peaks:[]};
   // check plateau case
-  
-  
+  let plateauStack = [];
+  for (let i = 0; i < sign.length; i++) {
+      if (sign[i] !== '-') {
+        plateauStack.push(sign[i]);
+      } else {
+        // pop until a + is seen;
+        let j = i-1;
+        let token;
+        while (plateauStack.length > 0 && (token = plateauStack.pop()) !== '+') {
+          j -= 1;
+        }
+        if (token === '+') {
+          result.pos.push(j);
+          result.peaks.push(arr[j]);
+          plateauStack = [];
+        }
+      }
+  }  
   return result;
 }
 
