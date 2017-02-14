@@ -1,5 +1,24 @@
 function solve(map, miner, exit) {
   // TODO
+  const UP = 'up';
+  const DOWN =  'down';
+  const RIGHT = 'right';
+  const LEFT = 'left';
+
+  // find the dimensions of the map
+  const NUM_ROW = map.length;
+  const NUM_COL = map[0].length;
+
+  let routeQueue = [];
+  // find the position of up, down, right, down
+  // discard the path if the next move is not valid
+  // discard the path if the next move hits a wall
+  // if the next move is exit, push the next move in path and return it
+  // if the next move is not exit but next move is open, push it to path
+  // push to queue
+
+  // if route queue is eventually empty, return null
+
   return [];
 }
 
