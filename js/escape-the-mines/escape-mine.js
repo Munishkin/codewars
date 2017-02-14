@@ -1,4 +1,4 @@
-function solve(map, miner, exit) {
+function solve(mineMap, miner, exit) {
   // TODO
   const UP = 'up';
   const DOWN =  'down';
@@ -6,10 +6,16 @@ function solve(map, miner, exit) {
   const LEFT = 'left';
 
   // find the dimensions of the map
-  const NUM_ROW = map.length;
-  const NUM_COL = map[0].length;
+  const NUM_ROW = mineMap.length;
+  const NUM_COL = mineMap[0].length;
 
-  let routeQueue = [];
+  console.log(`num rows: ${NUM_ROW}, num cols: ${NUM_COL}`);
+
+  let initial = {
+    pos: { x: miner.x, y: miner.y },
+    path: []
+  }
+  let routeQueue = [initial];
   // find the position of up, down, right, down
   // discard the path if the next move is not valid
   // discard the path if the next move hits a wall
@@ -18,6 +24,47 @@ function solve(map, miner, exit) {
   // push to queue
 
   // if route queue is eventually empty, return null
+  let newX;
+  let newY;
+
+  let isValidMove = (x, y, mineMap) => {
+    console.log (`newX: ${newX}, newY: ${newY}`);
+    return  (newX >= 0 && newX < NUM_COL &&
+        newY >= 0 && numY < NUM_ROW &&
+        mineMap[newX][newY] === true);
+  };
+
+  while (routeQueue.length > 0) {
+    let { pos, path } = routeQueue.shift()
+    console.log(pos);
+    console.log(path);
+    if (pos.x === exit.x && pos.y === exit.y) {
+      return path;
+    }
+
+    let clonedPath = JSON.parse(JSON.stringify(path));
+
+    // derive up position
+    newX = { x: pos.x, y: pos.y - 1 };
+    newY = pos.y - 1;
+    if (isValidMove(newX, newY, mineMap)) {
+      let newPos = {}
+    }
+
+    // derive down position
+    newX = pos.x;
+    newY = pos.y + 1;
+
+    // derive left position
+    newX = pos.x - 1;
+    newY = pos.y;
+
+    // derive right position
+    newX = pos.x + 1;
+    newY = pos.y;
+
+  }
+
 
   return [];
 }
@@ -25,6 +72,7 @@ function solve(map, miner, exit) {
 
 var map = [[true]];
 
+// return [];
 console.log(solve(map, {x:0,y:0}, {x:0,y:0}));
 
 map = [[true, false],
