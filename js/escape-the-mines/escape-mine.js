@@ -1,5 +1,4 @@
 function solve(mineMap, miner, exit) {
-  // TODO
   const UP = 'up';
   const DOWN =  'down';
   const RIGHT = 'right';
@@ -8,8 +7,6 @@ function solve(mineMap, miner, exit) {
   // find the dimensions of the map
   const NUM_ROW = mineMap.length;
   const NUM_COL = mineMap[0].length;
-
-  console.log(`num rows: ${NUM_ROW}, num cols: ${NUM_COL}`);
 
   let initial = {
     pos: { x: miner.x, y: miner.y },
@@ -23,48 +20,55 @@ function solve(mineMap, miner, exit) {
   // if the next move is not exit but next move is open, push it to path
   // push to queue
 
-  // if route queue is eventually empty, return null
-  let newX;
-  let newY;
-
-  let isValidMove = (x, y, mineMap) => {
-    console.log (`newX: ${newX}, newY: ${newY}`);
-    return  (newX >= 0 && newX < NUM_COL &&
-        newY >= 0 && numY < NUM_ROW &&
-        mineMap[newX][newY] === true);
+  let isValidMove = (move) => {
+    return  (move.x >= 0 && move.x < NUM_ROW &&
+        move.y >= 0 && move.y < NUM_COL &&
+        mineMap[move.x][move.y] === true);
   };
+
+  let makeNextStop = (move, path, direction) => {
+    let clonedPath = JSON.parse(JSON.stringify(path));
+    if (isValidMove(move)) {
+      clonedPath.push(direction);
+      return { pos: move, path: clonedPath };
+    }
+    return null;
+  }
 
   while (routeQueue.length > 0) {
     let { pos, path } = routeQueue.shift()
-    console.log(pos);
-    console.log(path);
     if (pos.x === exit.x && pos.y === exit.y) {
       return path;
     }
 
-    let clonedPath = JSON.parse(JSON.stringify(path));
-
-    // derive up position
-    newX = { x: pos.x, y: pos.y - 1 };
-    newY = pos.y - 1;
-    if (isValidMove(newX, newY, mineMap)) {
-      let newPos = {}
+    // derive left position
+    let move = { x: pos.x, y: pos.y - 1 };
+    let nextStop = makeNextStop(move, path, UP);
+    if (nextStop) {
+      routeQueue.push(nextStop);
     }
 
-    // derive down position
-    newX = pos.x;
-    newY = pos.y + 1;
+    // right
+    move = { x: pos.x, y: pos.y + 1 };
+    nextStop = makeNextStop(move, path, DOWN);
+    if (nextStop) {
+      routeQueue.push(nextStop);
+    }
 
-    // derive left position
-    newX = pos.x - 1;
-    newY = pos.y;
+    // up
+    move = { x: pos.x - 1, y: pos.y };
+    nextStop = makeNextStop(move, path, LEFT);
+    if (nextStop) {
+      routeQueue.push(nextStop);
+    }
 
-    // derive right position
-    newX = pos.x + 1;
-    newY = pos.y;
-
+    // down
+    move = { x: pos.x + 1, y: pos.y };
+    nextStop = makeNextStop(move, path, RIGHT);
+    if (nextStop) {
+      routeQueue.push(nextStop);
+    }
   }
-
 
   return [];
 }
@@ -83,6 +87,7 @@ console.log(solve(map, {x:0,y:0}, {x:1,y:0}));
 
 // ['right', 'down']
 console.log(solve(map, {x:0,y:0}, {x:1,y:1}));
+
 
 map = [[true], [true], [true], [true]];
 
@@ -107,6 +112,7 @@ console.log(solve(map, {x:0,y:0}, {x:2,y:0}));
 
   //         ['down', 'right', 'down', 'right', 'down', 'right', 'down', 'right']
   console.log(solve(map, {x:0,y:0}, {x:4,y:4}));
+
 
   map = [[true, true, true, false, true],
     [false, false, true, false, true],
