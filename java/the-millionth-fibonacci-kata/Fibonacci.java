@@ -5,6 +5,19 @@ import java.math.BigInteger;
 
 public class Fibonacci {
 
+	private static BigInteger[][] multiply(BigInteger[][] a, BigInteger[][] b) {
+		
+		BigInteger[][] result = new BigInteger[2][2];
+		result[0] = new BigInteger[2];
+		result[1] = new BigInteger[2];
+		
+		result[0][0] = a[0][0].multiply(b[0][0]).add(a[0][1].multiply(b[1][0]));
+		result[0][1] = a[0][0].multiply(b[0][1]).add(a[0][1].multiply(b[1][1]));
+		result[1][0] = a[1][0].multiply(b[0][0]).add(a[1][1].multiply(b[1][0]));
+		result[1][1] = a[1][0].multiply(b[0][1]).add(a[1][1].multiply(b[1][1]));
+		return result;
+	}
+
 	// properties of matrix
 	// A^p = A if p = 1
 	// A^p = A^(p - 1) * A if p is odd
@@ -15,38 +28,18 @@ public class Fibonacci {
 		}
 
 		BigInteger[][] sm = null;
-		BigInteger[][] result = null;
 		BigInteger two = BigInteger.valueOf(2L);
 		if (p.mod(two).intValue() == 1) {
 			sm = calculateMatrix(m, p.subtract(BigInteger.ONE));
 
 			// [a b ][e f] = [ae + bg   af + fh]
 			// [c d ][g h]   [ce + dg   cf + dh]
-
-			result = new BigInteger[2][2];
-			result[0] = new BigInteger[2];
-			result[1] = new BigInteger[2];
-
-			result[0][0] = sm[0][0].multiply(m[0][0]).add(sm[0][1].multiply(m[1][0]));
-			result[0][1] = sm[0][0].multiply(m[0][1]).add(sm[0][1].multiply(m[1][1]));
-			result[1][0] = sm[1][0].multiply(m[0][0]).add(sm[1][1].multiply(m[1][0]));
-			result[1][1] = sm[1][0].multiply(m[0][1]).add(sm[1][1].multiply(m[1][1]));
-			return result;
+			return multiply(sm, m);
 		}
 		sm = calculateMatrix(m, p.divide(two));
-
-		result = new BigInteger[2][2];
-		result[0] = new BigInteger[2];
-		result[1] = new BigInteger[2];
-
 		// [a b][a b] = [a^2 + bc   ab + bd]
 		// [c d][c d]   [ac + cd    cb + d^2]
-
-		result[0][0] = sm[0][0].multiply(sm[0][0]).add(sm[0][1].multiply(sm[1][0]));
-		result[0][1] = sm[0][0].multiply(sm[0][1]).add(sm[0][1].multiply(sm[1][1]));
-		result[1][0] = sm[1][0].multiply(sm[0][0]).add(sm[1][1].multiply(sm[1][0]));
-		result[1][1] = sm[1][0].multiply(sm[0][1]).add(sm[1][1].multiply(sm[1][1]));
-		return result;
+		return multiply(sm, sm);
 	}
 
 	public static BigInteger fib(BigInteger n) {
@@ -80,9 +73,8 @@ public class Fibonacci {
 		T[1] = new BigInteger[] { BigInteger.ONE, BigInteger.ONE };
 
 		BigInteger[][] TN = calculateMatrix(T, n.subtract(BigInteger.ONE));
-
 		return TN[0][0].add(TN[0][1]);
-	  }
+	}
 
 
 	public static void main(String[] args) {
