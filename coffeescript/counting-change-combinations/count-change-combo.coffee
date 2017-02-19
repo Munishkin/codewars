@@ -21,10 +21,23 @@ countChange = (money, coins) ->
   # initialize coin_count array from 0 .. money
   # coin_count[0] = 0
   # coin_count[n] = 1 if n is in the coins array
-  # for each coin amount in coin_count array
-  #   for each coin
+  # for each coin amount i in coin_count array
+  #   for each coin j
+  #      k = i - j
+  #      if k < 0 do nothing
+  #      if k >= 0 then coin_count[i] += coin_count[k]
+  
   9
   
 console.log countChange(4, [1,2]) is 3
 console.log countChange(10, [5,2, 3]) is 4
 console.log countChange(11, [5, 7]) is 0
+
+
+#coin amount:  0 1 2 3 4
+#coin combo:   0 1 1 2 3
+#   coin_count[3] = coin_count[2] + coin_count[1]
+#   coin_count[4] = coin_count[3] + coin_count[2]
+              
+#coin amount:  0 1 2 3 4 5 6 7 8 9 10
+#coin combo:   0 0 1 1 1 
