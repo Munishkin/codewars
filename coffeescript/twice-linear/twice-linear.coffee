@@ -5,39 +5,31 @@
 
 # 1 3 4 7 9 10 13 15 19 21 22 27 28 31 40 46
 
-insertNum = (queue, v) ->
-  if queue.includes(v) then return
-  queue.push v
+# https://github.com/Vargentum/codewars-katas/blob/master/src/js/5/08.twice_linear.js
+# uses two-pointer algorithm
 
-findNextSmallest = (queue) ->
-  i = 1
-  min_idx = 0
-  while i < queue.length
-    if queue[i] < queue[min_idx] then min_idx = i
-    i += 1
-  smallest = queue.splice min_idx, 1
-  smallest[0]
+genX = (x) ->
+  2 * x + 1
+  
+genY = (x) ->
+  3 * x + 1
 
 dblLinear = (n) ->
-  
-  # if number of elements in u is at least (n+1), return n+1 element and done
-  # pop the first integer x  in queue, append it to u
-  # calculate 2x + 1 and 3x + 1, append to queue
-  # inserted the new values in queue such that queue remains sorted
-
-  queue = [1]
+  u = [1]
   count = 0
-  x = -1
+  p1 = 0
+  p2 = 0
   while count < (n+1)
-    x = findNextSmallest queue
-    y = 2 * x + 1
-    z = 3 * x + 1
-    insertNum queue, y
-    insertNum queue, z
-    count += 1
-  x
+    y = genX u[p1]
+    z = genY u[p2]
+    if y isnt z
+      u.push Math.min(y, z)
+      if y < z then p1 +=1 else p2 += 1
+      count += 1
+    else
+      p1 += 1
+  u[n]
   
-
 console.log dblLinear(0) is 1
 console.log dblLinear(10) is 22
 console.log dblLinear(20) is 57
@@ -48,5 +40,3 @@ console.log dblLinear(2000) is 19773
 console.log dblLinear(1000) is 8488
 console.log dblLinear(500) is 3355
 console.log dblLinear(60000)
-#console.log dblLinear(2000)
-#console.log dblLinear(1000)
