@@ -19,16 +19,10 @@ DI.prototype.inject = function (func) {
  
   // check if all dependencies are resolved
   let isResolved = currentArgNames.every((n) => { return this.dependency[n]; });
-  let args = [];
-  if (isResolved) {
-      args = currentArgNames.map((n) => {
-        return this.dependency[n] ? this.dependency[n] : undefined; 
-      });
-  } 
-    
-  return function() {
-    return func.apply(null, args);
-  }
+  let args = isResolved ? 
+              currentArgNames.map((n) => { return this.dependency[n]; }) : [];
+   
+  return function() { return func.apply(null, args); }
 }
 
 let deps = {
