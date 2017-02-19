@@ -9,26 +9,17 @@
 #1+1+2 == 2+1+1
 #Also, assume that you have an infinite ammount of coins.
 
-#Your function should take an amount to change and an array of unique
-#denominations for the coins:
+# https://andrew.neitsch.ca/publications/m496pres1.nb.pdf
+# Let f(n, k) be the number of ways of making change for n cents, using only
+# the first k types of coin.
 
-#  countChange(4, [1,2]) # => 3
-#  countChange(10, [5,2,3]) # => 4
-#  countChange(11, [5,7]) # => 0
+#By using the equivalent recurrence relation
+#f(n, k) =  0, k > |a| or n < 0, |a| is number of coin denomination
+#           1, n = 0
+#          f(n, k + 1) + f(n - ak, k), else
+# the answer is f(n, 1)
 
 countChange = (money, coins) ->
-  # solve with dynamic programming
-  # initialize coin_count array from 0 .. money
-  # coin_count[0] = []
-  # coin_count[n] = [[n]] if n is in the coins array
-  # for each coin amount i in coin_count array
-  #   for each coin j
-  #      k = i - j
-  #      if k < 0 do nothing
-  #      if k >= 0 and k >= j then
-  #         proposed solution = coin_count[k] + [j] and sorted,
-  #         check for existence. if not existence, insert to coin_count[k]
-  #   return the length of coin_count[n]
   coin_count = []
   coin_count.push [] for i in [0..money]
   for c in coins
