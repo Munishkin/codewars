@@ -20,35 +20,21 @@
 # the answer is f(n, 1)
 
 countChange = (money, coins) ->
+  
   coin_count = []
-  coin_count.push [] for i in [0..money]
-  for c in coins
-    if c <= money then coin_count[c][0] = [c]
-  #console.log coin_count
-    
   for i in [0..money]
-    for j in coins
-      k = i - j
-      if k >= j
-        for solution in coin_count[k]
-          c_solution = solution.slice 0
-          c_solution.push j
-          c_solution.sort()
-          #console.log cloned_solution
-          strCoinCount = JSON.stringify coin_count[i]
-          strSol = JSON.stringify c_solution
-          if strCoinCount.indexOf(strSol) < 0 then coin_count[i].push c_solution
-    #console.log "i: #{i}"
-    #console.log coin_count[i]
-  #console.log coin_count
-  coin_count[money].length
+    coin_count.push []
+    coin_count[i].push(0) for j in [0..coins.length]
+    
+  console.log coin_count
+  0
 
-#console.log countChange(4, [1,2])
+console.log countChange(4, [1,2])
 #console.log countChange(4, [1,2]) is 3
 #console.log countChange(10, [5,2, 3]) is 4
 #console.log countChange(11, [5, 7]) is 0
 
-console.log countChange(300, [ 5, 10, 20, 50, 100, 200, 500 ])
+#console.log countChange(300, [ 5, 10, 20, 50, 100, 200, 500 ])
 
 #console.log countChange(10, [ 5, 10 ])
 
