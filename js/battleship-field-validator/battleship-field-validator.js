@@ -29,80 +29,78 @@ function validateBattlefield(field) {
 
   // one componet at a time
   let label = 0;
-  let visited = [];
-  let component = {};
+  let component = [];
   let queue = [];
+  let components = null;
 
-  for (let i = 0; i < 10; i++) {
+  const SIZE = 10;
+
+  let visited = [];
+  for (let i = 0; i < SIZE; i++) {
     visited.push([]);
-    for (let j = 0; j < 10; j++) {
+    for (let j = 0; j < SIZE; j++) {
       visited[i].push(false);
     }
   }
-  //console.log(visited);
 
-  // key is label, value is an array of 2d points
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 10; j++) {
-      let p = {r: i, c: j};
-      queue.push(p);
-      let components = [];
-      while (queue.length > 0) {
-        let comp = queue.shift();
-        let {r, c} = comp;
-        if (r >= 0 && r < 10 && c >= 0 && c < 10) {
-          if (field[r][c] === 0) { visited[r][c] = true; }
-          else {
-            if (!visited[r][c]) {
-              visited[r][c] = true;
-              components.push(comp);
-              // find neighbors and push to queue to explore
-              let neighbors = [
-                {r: r - 1, c: c}, {r: r + 1, c: c},
-                {r: r, c: c - 1}, {r: r, c: c + 1},
-                {r: r - 1, c: c - 1}, {r: r - 1, c: c + 1},
-                {r: r + 1, c: c - 1}, {r: r + 1, c: c + 1}
-              ];
-              queue = queue.concat(neighbors);
-            }
-          }
-        }
-      }
-      if (components.length > 0) {
-        component[label++] = components;
-      }
-    }
-  }
-  console.log(component);
-
-  //From there, you just need to iterate over each blob and check that it's
-  // either a vertical or horizontal line.
-  let isVerticalOrHorizontal = (components) => {
-    // is vertical, same c and different r
-    let row = components[0].r;
-    let col = components[0].c;
-
-    components.every((c) = > { })
-
-    // is horizontal, same r and different c
-
-    return true;
+  let hasOverlapOrContact = (components) => {
+    // is vertical or horizontal
+    return !(components.every((p) => { return p.r === components[0].r })
+      || components.every((p) => { return p.c === components[0].c }));
   };
 
-  // Finally, check that you have the correct number of each ship type.
-  // If you don't, then the field is invalid. If you do, the field is valid,
-  // and you're done.
+  let generateNeighbors = (r, c) => {
+    let offsets = [ [-1, 0], [1, 0], [0, -1], [0, 1], [-1, -1], [-1, 1], [1, -1], [1, 1] ];
+    return offsets.reduce((acc, offset) => {
+      let neighbor_r = r + offset[0];
+      let neighbor_c = c + offset[1];
+      if (neighbor_r >= 0 && neighbor_r < SIZE && neighbor_c >= 0 && neighbor_c < SIZE) {
+        acc.push ({r: neighbor_r, c: neighbor_c });
+      }
+      return acc;
+    }, []);
+  };
 
-  // check if single battleship (size of 4 cells)
+  let hasCorrectNumShip = (components, size, expectedNumShip) => {
+      return components.filter((c) => { return c.length === size })
+        .length === expectedNumShip;
+  };
 
-  // check for 2 cruisers (size of 3 cells)
+  // key is label, value is an array of 2d points
+  for (let i = 0; i < SIZE; i++) {
+    for (let j = 0; j < SIZE; j++) {
+      queue.push({r: i, c: j});
+      components = [];
+      while (queue.length > 0) {
+        let {r, c} = queue.shift();
+        if (field[r][c] === 1 && !visited[r][c]) {
+          visited[r][c] = true;
+          components.push({r, c});
+          // find neighbors and push to queue to explore
+          queue = queue.concat(generateNeighbors(r, c));
+        }
+      }
+      if (components.length > 0) { component.push(components); }
+    }
+  }
 
-  // check for 3 destroyers (size of 2 cells)
+  let wrongShape = component.some((c) => { return hasOverlapOrContact(c); });
+  if (!wrongShape) {
+    // Finally, check that you have the correct number of each ship type.
+    // If you don't, then the field is invalid. If you do, the field is valid,
+    // and you're done.
 
-  // check for 4 submarines (size of 1 cell)
+    // check if single battleship (size of 4 cells)
+    // check for 2 cruisers (size of 3 cells)
+    // check for 3 destroyers (size of 2 cells)
+    // check for 4 submarines (size of 1 cell)
+    return hasCorrectNumShip(component, 4, 1) &&
+            hasCorrectNumShip(component, 3, 2) &&
+            hasCorrectNumShip(component, 2, 3) &&
+            hasCorrectNumShip(component, 1, 4);
+  }
   return false;
 }
-
 
 console.log(validateBattlefield(
                 [[1, 0, 0, 0, 0, 1, 1, 0, 0, 0],
