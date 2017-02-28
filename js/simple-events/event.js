@@ -15,28 +15,32 @@ Also see an example test fixture for suggested usage
 
 function Event() {
   //your implementation goes here
+  this.handlers = [];
 }
 
-Event.prototype.subscribe = function() {
-  console.log('subscribe:' +  arguments);
+Event.prototype.subscribe = function(func) {
+  this.handlers.push(func);
 }
 
-Event.prototype.unsubscribe = function() {
-  console.log('unsubscribe:' +arguments);
-
+Event.prototype.unsubscribe = function(func) {
+  let idx = this.handlers.findIndex((f) => { return f == func; });
+  if (idx >= 0) {
+    this.handlers.splice(idx, 1);
+  }
 }
 
 Event.prototype.emit = function() {
-  console.log('emit:' +arguments);
+  this.handlers.forEach((f) => {
+    f.apply(null, arguments);
+  });
 }
-
 
 // test cases
 var event = new Event();
 
 function f() {
     f.calls = (f.calls || 0) + 1;
-    console.log(arguments);
+    //console.log(arguments);
     f.args = Array.prototype.slice.call(arguments);
 }
 
