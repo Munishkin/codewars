@@ -29,6 +29,10 @@
 #where	φ is latitude, λ is longitude, R is earth’s radius (mean radius = 6,371km);
 #note that angles need to be in radians to pass to trig functions!
 
+#To calculate decimal degrees, we use the DMS to decimal degree formula below:
+#Decimal Degrees = degrees + (minutes/60) + (seconds/3600)
+#DD = d + (min/60) + (sec/3600)
+
 distance = (coord1, coord2) ->
   console.log coord1, coord2
   # return the close 10 in km
