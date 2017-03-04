@@ -45,15 +45,12 @@ convertCoord = (coord) ->
   # strip unit symbol and convert to integer before the final conversion
   # oh no, need to convert sign if direction is S or W
   # Reference: http://stackoverflow.com/questions/1140189/converting-latitude-and-longitude-to-decimal-values
-  #f = (e) -> if typeof e is 'number' then parseInt(e[0...e.length - 1]) else e
   parseCoord = (e, idx) -> if idx isnt 3 then parseInt(e[0...e.length - 1]) else e
   [latDeg, latMin, latSec, latDir] = lat.split(' ').map parseCoord
   [lonDeg, lonMin, lonSec, lonDir] = lon.split(' ').map parseCoord
 
-  degLat = latDeg + latMin/60 + latSec/3600;
-  degLon = lonDeg + lonMin/60 + lonSec/3600;
-  if latDir is 'S' then degLat = degLat * -1
-  if lonDir is 'W' then degLon = degLon * -1
+  degLat = (latDeg + latMin/60 + latSec/3600) * (if latDir is 'S' then -1 else 1);
+  degLon = (lonDeg + lonMin/60 + lonSec/3600) * (if lonDir is 'W' then -1 else 1);
   return { lat: degLat, lon: degLon }
 
 converToRad = (decimalDeg) -> decimalDeg * Math.PI / 180;
@@ -95,12 +92,10 @@ distance = (coord1, coord2) ->
 # Test cases
 ans = distance("48° 12′ 30″ N, 16° 22′ 23″ E", "23° 33′ 0″ S, 46° 38′ 0″ W");
 #Returns 10130
-#console.log ans
 console.log ans is 10130
 
 ans = distance("48° 12′ 30″ N, 16° 22′ 23″ E", "58° 18′ 0″ N, 134° 25′ 0″ W");
 # Returns 7870
-#console.log ans
 console.log ans is 7870
 
 ans = distance("48° 12′ 30″ N, 16° 22′ 23″ E", "48° 12′ 30″ N, 16° 22′ 23″ E");
