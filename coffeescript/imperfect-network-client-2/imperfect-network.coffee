@@ -1,9 +1,9 @@
 class NetworkClient
   constructor: (@sendFunction, @callback) ->
-    @msgIdAccumulator = [];
-    @msgBuffer = [];
-    @msgId = 0;
-    @processMsgId = 0;
+    @msgIdAccumulator = []
+    @msgBuffer = []
+    @msgId = 0
+    @processMsgId = 0
 
   send: (data) ->
     # could wrap data with extra information to send
@@ -15,14 +15,15 @@ class NetworkClient
     # could unpack data and validate
     packedData = JSON.parse data
     { msgId } = packedData;
+
     # check duplicate
-    if this.msgIdAccumulator.indexOf(msgId) < 0
+    if @msgIdAccumulator.indexOf(msgId) < 0
        @msgIdAccumulator.push msgId;
        @msgBuffer.push packedData;
-       findNextMsg = (a) -> a.msgId is @processMsgId
+       findNextMsg = (a) => a.msgId is @processMsgId
        idx = @msgBuffer.findIndex findNextMsg
        while idx >= 0
-         { origData } = @msgBuffer.splice(idx, 1)[0]
+         { data: origData } = @msgBuffer.splice(idx, 1)[0]
          @callback origData;
          @processMsgId += 1;
          idx = @msgBuffer.findIndex findNextMsg
