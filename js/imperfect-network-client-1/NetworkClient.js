@@ -16,8 +16,6 @@ NetworkClient.prototype.recv = function (data) {
     // Could unpack data and validate
     let jsonData = JSON.parse(data);
     let {data: origData, msgId} = jsonData;
-    //let msgId = data.substring(data.length - 1);
-    //let data = data.substring(0, data.length -1);
     if (this.msgIdAccumulator.indexOf(msgId) < 0) {
        this.msgIdAccumulator.push(msgId);
        this.callback(origData);
