@@ -56,17 +56,15 @@ function NetworkClient (sendFunction, callback) {
 
 NetworkClient.prototype.send = function (data) {
     // Could wrap data with extra information to send
-    let packedData = data + ':' + this.msgId;
+    let packedData = JSON.stringify({ data: data, msgId: this.msgId });
     this.sendFunction(packedData);
     this.msgId += 1;
 };
 
 NetworkClient.prototype.recv = function (recvData) {
     // Could unpack data and validate
-    let lastSep = recvData.lastIndexOf(':');
-    let [ data , msgId ] = [ recvData.substring(0, lastSep), recvData.substring(lastSep + 1)];
-    msgId = parseInt(msgId);
-    let packedData = { data: data, msgId: msgId };
+    let packedData = JSON.parse(recvData);
+    let { data, msgId } = packedData;
     // check duplicate
     if (this.msgIdAccumulator.indexOf(msgId) < 0) {
        this.msgIdAccumulator.push(msgId);
