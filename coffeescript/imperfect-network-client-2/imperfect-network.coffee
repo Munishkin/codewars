@@ -7,7 +7,7 @@ class NetworkClient
 
   send: (data) ->
     # could wrap data with extra information to send
-    packedData = JSON.stringify { data: data, msgId: this.msgId }
+    packedData = JSON.stringify { data: data, msgId: @msgId }
     @sendFunction packedData
     @msgId += 1
 
