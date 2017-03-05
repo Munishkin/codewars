@@ -64,7 +64,7 @@ NetworkClient.prototype.send = function (data) {
 NetworkClient.prototype.recv = function (recvData) {
     // Could unpack data and validate
     let packedData = JSON.parse(recvData);
-    let { data, msgId } = packedData;
+    let { msgId } = packedData;
     // check duplicate
     if (this.msgIdAccumulator.indexOf(msgId) < 0) {
        this.msgIdAccumulator.push(msgId);
