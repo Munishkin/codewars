@@ -139,6 +139,16 @@ function primeSeq() {
 }
 
 function partialSumSeq() {
+  let args = [].slice.call(arguments);
+  let idx = 0;
+  return () => {
+    if (idx === args.length) { throw new Error('End of sequence'); }
+    idx++;
+    return args.slice(0, idx).reduce((acc, e) => {
+                  acc += e;
+                  return acc;
+              }, 0);
+  }
 }
 
 let seq = generator(dummySeq);
@@ -184,12 +194,15 @@ console.log(seq5.next() === 37);
 console.log(seq5.next() === 41);
 console.log(seq5.next() === 43);
 
-
-/*let seq6 = generator(partialSumSeq, -1, 4, 2, 5);
+let seq6 = generator(partialSumSeq, -1, 4, 2, 5);
 console.log(seq6.next() === -1);
 console.log(seq6.next() === 3);
 console.log(seq6.next() === 5);
 console.log(seq6.next() === 10); //End of sequence
-seq.next();  // expect exception thrown
-*/
+try {
+  seq6.next();  // expect exception thrown
+} catch (e) {
+  console.log(e);
+}
+
 //Test.expectError('End of sequence error expected', seq.next);
