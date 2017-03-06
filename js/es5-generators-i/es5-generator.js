@@ -116,6 +116,26 @@ function rangeSeq(start, step) {
 }
 
 function primeSeq() {
+  let [current, next] = [2, 3];
+  return () => {
+    let prime = current;
+    current = next;
+    while (true) {
+      next += 2;
+      let lowerbound = Math.floor(Math.sqrt(next));
+      isPrime = true;
+      while (isPrime && lowerbound >= 2) {
+          if (next % lowerbound === 0) {
+            isPrime = false;
+          }
+          lowerbound -= 1;
+      }
+      if (isPrime) {
+        break;
+      }
+    }
+    return prime;
+  }
 }
 
 function partialSumSeq() {
@@ -148,7 +168,6 @@ console.log(seq4.next() === 8);
 console.log(seq4.next() === 11);
 console.log(seq4.next() === 14);
 
-/*
 let seq5 = generator(primeSeq);
 console.log(seq5.next() === 2);
 console.log(seq5.next() === 3);
@@ -158,8 +177,15 @@ console.log(seq5.next() === 11);
 console.log(seq5.next() === 13);
 console.log(seq5.next() === 17);
 console.log(seq5.next() === 19);
+console.log(seq5.next() === 23);
+console.log(seq5.next() === 29);
+console.log(seq5.next() === 31);
+console.log(seq5.next() === 37);
+console.log(seq5.next() === 41);
+console.log(seq5.next() === 43);
 
-let seq6 = generator(partialSumSeq, -1, 4, 2, 5);
+
+/*let seq6 = generator(partialSumSeq, -1, 4, 2, 5);
 console.log(seq6.next() === -1);
 console.log(seq6.next() === 3);
 console.log(seq6.next() === 5);
