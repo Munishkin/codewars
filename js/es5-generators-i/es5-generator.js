@@ -69,7 +69,7 @@
 
 
 function SequenceGenerator(sequencer, args) {
-    this.func = sequencer(args);
+    this.func = sequencer(...args);
 }
 
 SequenceGenerator.prototype.next = function() {
@@ -78,6 +78,7 @@ SequenceGenerator.prototype.next = function() {
 
 function generator(sequencer) {
   let args = [].slice.call(arguments)
+  // remove the mandatory sequencer function
   args.splice(0, 1);
   return new SequenceGenerator(sequencer, args);
 }
@@ -106,6 +107,12 @@ function fibonacciSeq() {
 }
 
 function rangeSeq(start, step) {
+  let i = 0;
+  return () => {
+    let result =  start + i * step;
+    i++;
+    return result;
+  }
 }
 
 function primeSeq() {
@@ -135,14 +142,14 @@ console.log(seq3.next() === 5); // fib(4) = 5
 console.log(seq3.next() === 8); // fib(5) = 8
 console.log(seq3.next() === 13); // fib(6) = 13
 
-/*
 let seq4 = generator(rangeSeq, 5, 3); // 5,8,11,14,17
 console.log(seq4.next() === 5);
 console.log(seq4.next() === 8);
 console.log(seq4.next() === 11);
 console.log(seq4.next() === 14);
 
-var seq5 = generator(primeSeq);
+/*
+let seq5 = generator(primeSeq);
 console.log(seq5.next() === 2);
 console.log(seq5.next() === 3);
 console.log(seq5.next() === 5);
