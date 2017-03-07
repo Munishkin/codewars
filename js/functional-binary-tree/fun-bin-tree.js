@@ -77,6 +77,7 @@ EmptyBinaryTree.prototype.preorder = function(fn) { return ''; };
 EmptyBinaryTree.prototype.postorder = function(fn) { return ''; };
 
 EmptyBinaryTree.prototype.contains = function(x) { return false; };
-EmptyBinaryTree.prototype.insert = function(x) { /* implement this */
+EmptyBinaryTree.prototype.insert = function(x) {
+  return new BinaryTreeNode(x, null, null);
 };
-EmptyBinaryTree.prototype.remove = function(x) { /* implement this */ };
+EmptyBinaryTree.prototype.remove = function(x) { return this; };
