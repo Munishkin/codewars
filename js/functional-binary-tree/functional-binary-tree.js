@@ -54,21 +54,28 @@ BinaryTreeNode.prototype.insert = function(x) {
   // The insert(x) function returns a new tree that contains a new node with value x.
   // If there is already a node containing x, this should still add another one,
   // but it doesn't matter whether it is right or left of the existing one
-  if (this.value <= x) {
+  if (this.value < x) {
     this.left = this.left.insert(x);
   } else {
     this.right = this.right.insert(x);
   }
   return this;
 };
+
 BinaryTreeNode.prototype.remove = function(x) {
+
+  let minValue = (root) => {
+    if (root.left instanceof EmptyBinaryTree) {
+      return root.value;
+    }
+    return minValue(root.left);
+  };
+
   if (this.value === x) {
       // empty tree after removal
       if (this.left instanceof EmptyBinaryTree &&
           this.right instanceof EmptyBinaryTree) {
-        let tempRoot = this.left;
-        this.left = this.right = null;
-        return tempRoot;
+        return this.left;
       } else {
         if (this.left instanceof BinaryTreeNode && this.right instanceof EmptyBinaryTree) {
           return this.left;
@@ -77,12 +84,18 @@ BinaryTreeNode.prototype.remove = function(x) {
         } else {
           // replace root with smallest child of right subtree
           // remove smallest child of the right subtree
+          this.value = minValue(this.right);
+          this.right = this.right.remove(this.value);
         }
       }
   } else if (x < this.value) {
-    this.left = this.left.remove(x);
+    if (this.left intanceof BinaryTreeNode) {
+      this.left = this.left.remove(x);
+    }
   } else {
-    this.right = this.right.remove(x);
+    if (this.right intanceof BinaryTreeNode) {
+      this.right = this.right.remove(x);
+    }
   }
   return this;
 };
