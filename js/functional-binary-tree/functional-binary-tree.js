@@ -54,9 +54,20 @@ BinaryTreeNode.prototype.insert = function(x) {
   // The insert(x) function returns a new tree that contains a new node with value x.
   // If there is already a node containing x, this should still add another one,
   // but it doesn't matter whether it is right or left of the existing one
-
+  if (this.value <= x) {
+    this.left = this.left.insert(x);
+  } else {
+    this.right = this.right.insert(x);
+  }
+  return this;
 };
-BinaryTreeNode.prototype.remove = function(x) { /* implement this */ };
+BinaryTreeNode.prototype.remove = function(x) {
+  // empty tree after removal
+  if (this.value === x) {
+
+  }
+  return this;
+};
 
 ////////////////////////////////////////////////////////////////////////
 function EmptyBinaryTree() { Object.freeze(this); }
@@ -73,6 +84,6 @@ EmptyBinaryTree.prototype.postorder = function(fn) { return ''; };
 
 EmptyBinaryTree.prototype.contains = function(x) { return false; };
 EmptyBinaryTree.prototype.insert = function(x) {
-  return new BinaryTreeNode(x, null, null);
+  return new BinaryTreeNode(x, this, this);
 };
 EmptyBinaryTree.prototype.remove = function(x) { return this; };
