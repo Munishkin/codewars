@@ -1,41 +1,6 @@
-// However, when dealing with immutable nodes, one has to take special steps to
-// try to maintain efficiency. For example, to insert a node into a tree,
-// one needs to create
-// new nodes the whole way down to the insertion point, but one needn't
-// create any more nodes than there are on the path from the root of the
-// tree to the inserted node.
-
-// In some binary search tree implementations, one stores a value with a given key.
-// The key is used to decide where to place the item in the tree and where to look
-// for the item in the tree. In this kata, we will only be concerned with a tree
-// where the value also serves as the key. All values added to the tree will be
-// (usefully) comparable with < to all other values placed in the same tree. If
-// you are at a node n and you are looking for a value that is less than n.value,
-// then you should only need to look in the n.left subtree.
-
 // There are two classes involved here: EmptyBinaryTree and BinaryTreeNode.
 // Each of these should support the following operations: isEmpty(), depth(),
 // count(), inorder(), preorder(), postorder(), contains(), insert(), and remove().
-
-// The isEmpty() method should return true for EmptyBinaryTree instances and false
-// for BinaryTreeNode instances.
-
-// The depth() method should return the maximum number of nodes one would need to visit
-// to get from the current node to an empty node. In the above diagram, the depth
-// at the 'c' node would be 3. The depth at the 'd' node would be 1.
-
-// The count() method should return the number of non-empty nodes in the tree.
-
-// The inorder(fn), preorder(fn), and postorder(fn) methods each call the given
-// function fn with every value in the tree. The inorder(fn) should do the
-// left subtree before calling fn for the current value and then do the right subtree.
-// The preorder(fn) should call fn for the current value then do the left subtree
-// and then do the right subtree. The postorder(fn) should do the left subtree then
-// the right subtree and then call fn for the current value.
-
-// The contains(x) function should return whether the given tree contains a node
-// whose value is x. Note: this should not have to look at every node in the tree
-// to decide.
 
 // The insert(x) function returns a new tree that contains a new node with value x.
 // If there is already a node containing x, this should still add another one,
@@ -57,15 +22,44 @@ function BinaryTreeNode(value, left, right) {
 BinaryTreeNode.prototype = new BinaryTree();
 BinaryTreeNode.prototype.constructor = BinaryTreeNode;
 
-BinaryTreeNode.prototype.isEmpty = function() { /* implement this */ };
-BinaryTreeNode.prototype.depth = function() { /* implement this */ };
-BinaryTreeNode.prototype.count = function() { /* implement this */ };
+BinaryTreeNode.prototype.isEmpty = function() { return false; };
+BinaryTreeNode.prototype.depth = function() {
+  // return the maximum number of nodes one would need to visit
+  // to get from the current node to an empty node
+  return Math.max(this.left.depth(), this.right.depth()) + 1;
+};
 
-BinaryTreeNode.prototype.inorder = function(fn) { /* implement this */ };
-BinaryTreeNode.prototype.preorder = function(fn) { /* implement this */ };
-BinaryTreeNode.prototype.postorder = function(fn) { /* implement this */ };
+BinaryTreeNode.prototype.count = function() {
+  // count non-empty tree node in the tree
+  return this.left.count() + this.right.count() + 1;
+};
 
-BinaryTreeNode.prototype.contains = function(x) { /* implement this */ };
+BinaryTreeNode.prototype.inorder = function(fn) {
+  // The inorder(fn) should do the left subtree before calling fn for the
+  // current value and then do the right subtree.
+  return this.left.inorder(fn) + fn(this.value) + this.right.inorder(fn);
+};
+
+BinaryTreeNode.prototype.preorder = function(fn) {
+  // The preorder(fn) should call fn for the current value then do the left subtree
+  // and then do the right subtree.
+  return fn(this.value) + this.left.preorder(fn) + this.right.preorder(fn);
+};
+
+BinaryTreeNode.prototype.postorder = function(fn) {
+  // The postorder(fn) should do the left subtree then
+  // the right subtree and then call fn for the current value.
+  return this.left.postorder(fn) + this.right.inorder(fn) + fn(this.value);
+};
+
+BinaryTreeNode.prototype.contains = function(x) {
+
+  // The contains(x) function should return whether the given tree contains a node
+  // whose value is x.
+  if (this.value === x) { return true; }
+  if (x < this.value) { return this.left.contains(x); }
+  return this.right.contains(x);
+};
 BinaryTreeNode.prototype.insert = function(x) { /* implement this */ };
 BinaryTreeNode.prototype.remove = function(x) { /* implement this */ };
 
@@ -74,14 +68,15 @@ function EmptyBinaryTree() { Object.freeze(this); }
 EmptyBinaryTree.prototype = new BinaryTree();
 EmptyBinaryTree.prototype.constructor = EmptyBinaryTree;
 
-EmptyBinaryTree.prototype.isEmpty = function() { /* implement this */ };
-EmptyBinaryTree.prototype.depth = function() { /* implement this */ };
-EmptyBinaryTree.prototype.count = function() { /* implement this */ };
+EmptyBinaryTree.prototype.isEmpty = function() { return true; };
+EmptyBinaryTree.prototype.depth = function() { return 0; };
+EmptyBinaryTree.prototype.count = function() { return 0; };
 
-EmptyBinaryTree.prototype.inorder = function(fn) { /* implement this */ };
-EmptyBinaryTree.prototype.preorder = function(fn) { /* implement this */ };
-EmptyBinaryTree.prototype.postorder = function(fn) { /* implement this */ };
+EmptyBinaryTree.prototype.inorder = function(fn) { return ''; };
+EmptyBinaryTree.prototype.preorder = function(fn) { return ''; };
+EmptyBinaryTree.prototype.postorder = function(fn) { return ''; };
 
-EmptyBinaryTree.prototype.contains = function(x) { /* implement this */ };
-EmptyBinaryTree.prototype.insert = function(x) { /* implement this */ };
+EmptyBinaryTree.prototype.contains = function(x) { return false; };
+EmptyBinaryTree.prototype.insert = function(x) { /* implement this */
+};
 EmptyBinaryTree.prototype.remove = function(x) { /* implement this */ };
