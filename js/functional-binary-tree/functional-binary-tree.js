@@ -62,9 +62,27 @@ BinaryTreeNode.prototype.insert = function(x) {
   return this;
 };
 BinaryTreeNode.prototype.remove = function(x) {
-  // empty tree after removal
   if (this.value === x) {
-
+      // empty tree after removal
+      if (this.left instanceof EmptyBinaryTree &&
+          this.right instanceof EmptyBinaryTree) {
+        let tempRoot = this.left;
+        this.left = this.right = null;
+        return tempRoot;
+      } else {
+        if (this.left instanceof BinaryTreeNode && this.right instanceof EmptyBinaryTree) {
+          return this.left;
+        } else if (this.right instanceof BinaryTreeNode && this.left instanceof EmptyBinaryTree) {
+          return this.right;
+        } else {
+          // replace root with smallest child of right subtree
+          // remove smallest child of the right subtree
+        }
+      }
+  } else if (x < this.value) {
+    this.left = this.left.remove(x);
+  } else {
+    this.right = this.right.remove(x);
   }
   return this;
 };
