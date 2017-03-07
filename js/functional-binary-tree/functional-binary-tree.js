@@ -89,11 +89,11 @@ BinaryTreeNode.prototype.remove = function(x) {
         }
       }
   } else if (x < this.value) {
-    if (this.left intanceof BinaryTreeNode) {
+    if (this.left instanceof BinaryTreeNode) {
       this.left = this.left.remove(x);
     }
   } else {
-    if (this.right intanceof BinaryTreeNode) {
+    if (this.right instanceof BinaryTreeNode) {
       this.right = this.right.remove(x);
     }
   }
