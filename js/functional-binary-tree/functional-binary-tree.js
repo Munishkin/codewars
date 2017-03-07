@@ -2,15 +2,6 @@
 // Each of these should support the following operations: isEmpty(), depth(),
 // count(), inorder(), preorder(), postorder(), contains(), insert(), and remove().
 
-// The insert(x) function returns a new tree that contains a new node with value x.
-// If there is already a node containing x, this should still add another one,
-// but it doesn't matter whether it is right or left of the existing one
-// (or even if you just use a repeat-count in the BinaryTreeNode). Note:
-// there are several ways one could write this function. For this kata,
-// if the tree is non-empty, then inserting a new value should result in a
-// tree with the same root value as the previous tree. With the above examples,
-// this means:
-
 function BinaryTree() {};
 
 function BinaryTreeNode(value, left, right) {
@@ -53,14 +44,18 @@ BinaryTreeNode.prototype.postorder = function(fn) {
 };
 
 BinaryTreeNode.prototype.contains = function(x) {
-
   // The contains(x) function should return whether the given tree contains a node
   // whose value is x.
   if (this.value === x) { return true; }
   if (x < this.value) { return this.left.contains(x); }
   return this.right.contains(x);
 };
-BinaryTreeNode.prototype.insert = function(x) { /* implement this */ };
+BinaryTreeNode.prototype.insert = function(x) {
+  // The insert(x) function returns a new tree that contains a new node with value x.
+  // If there is already a node containing x, this should still add another one,
+  // but it doesn't matter whether it is right or left of the existing one
+
+};
 BinaryTreeNode.prototype.remove = function(x) { /* implement this */ };
 
 ////////////////////////////////////////////////////////////////////////
