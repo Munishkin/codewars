@@ -27,30 +27,22 @@ e.g.
 
 Number.prototype.twos = function(n) {
 
-  let value = Number(this);
+  //let value = Number(this);
+  //let value = this;
+  let decToBin = (num, digits) => {
 
-  //console.log ({val: value });
-  //console.log ({n: n});
-
-  let decToBin = (signbit, num, digits) => {
-
-      console.log({signbit: signbit, num: num, digits: digits});
-
-      let binStr = '';
-      while (num > 1) {
-        let rem = num % 2;
-        binStr += rem;
+      //console.log(num.toString(2));
+      let binStr = num.toString(2);
+      /*while (num > 1) {
+        binStr += (num % 2);
         num = Math.floor(num / 2);
-      }
-      binStr += num;
+      }*/
+      //binStr += num;
+      //console.log(binStr);
       if (binStr.length < digits) {
-        binStr += '0'.repeat(digits - binStr.length);
-        //console.log({binStr2: binStr});
+        binStr = '0'.repeat(digits - binStr.length) + binStr;
       }
-      binStr = binStr.split('').reverse().join('');
-      //console.log({binStr1: binStr});
-      binStr = signbit + binStr;
-      //console.log({binStr3: binStr});
+      console.log(binStr);
       return binStr;
   }
 
@@ -58,20 +50,13 @@ Number.prototype.twos = function(n) {
   // calculate the difference d between current value and 0
   // compute the d in (n - 1) bits
   // prepend the result with 0 and return
-  let result = '';
-  if (value >= 0) {
-    result = decToBin(0, value, n - 1);
-  } else {
 
-    // if number < 0, first bit is 1.  Find the smallest possible number
-    // calculate the difference d between current value and smallest positive value
-    // compute the d in (n - 1) bits
-    // prepend the result with 1 and return
-    let smallestValue = -1 * Math.pow(2, n-1);
-    let distance = value - smallestValue;
-    result = decToBin(1, distance, n - 1);
-  }
-  return result;
+  // if number < 0, first bit is 1.  Find the smallest possible number
+  // calculate the difference d between current value and smallest positive value
+  // compute the d in (n - 1) bits
+  // prepend the result with 1 and return
+  //let smallestValue = -1 * Math.pow(2, n-1);
+  return this >= 0 ? '0' + decToBin(this, n - 1) : '1' + decToBin(this + Math.pow(2, n-1), n - 1);
 }
 
 let n = 12;
