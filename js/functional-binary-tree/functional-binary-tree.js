@@ -40,26 +40,24 @@ BinaryTreeNode.prototype.preorder = function(fn) {
 BinaryTreeNode.prototype.postorder = function(fn) {
   // The postorder(fn) should do the left subtree then
   // the right subtree and then call fn for the current value.
-  return this.left.postorder(fn) + this.right.inorder(fn) + fn(this.value);
+  return this.left.postorder(fn) + this.right.postorder(fn) + fn(this.value);
 };
 
 BinaryTreeNode.prototype.contains = function(x) {
   // The contains(x) function should return whether the given tree contains a node
   // whose value is x.
-  if (this.value === x) { return true; }
-  if (x < this.value) { return this.left.contains(x); }
-  return this.right.contains(x);
+  return (this.value === x) ? true :
+    (x < this.value) ? this.left.contains(x) : this.right.contains(x);
 };
 BinaryTreeNode.prototype.insert = function(x) {
   // The insert(x) function returns a new tree that contains a new node with value x.
   // If there is already a node containing x, this should still add another one,
   // but it doesn't matter whether it is right or left of the existing one
-  if (this.value < x) {
-    this.left = this.left.insert(x);
+  if (x < this.value) {
+    return new BinaryTreeNode(this.value, this.left.insert(x), this.right);
   } else {
-    this.right = this.right.insert(x);
+    return new BinaryTreeNode(this.value, this.left, this.right.insert(x));
   }
-  return this;
 };
 
 BinaryTreeNode.prototype.remove = function(x) {
@@ -71,30 +69,31 @@ BinaryTreeNode.prototype.remove = function(x) {
     return minValue(root.left);
   };
 
+  if (!this.contains(x)) { return this; }
+
   if (this.value === x) {
       // empty tree after removal
-      if (this.left instanceof EmptyBinaryTree &&
-          this.right instanceof EmptyBinaryTree) {
+      if (this.left.isEmpty() && this.right.isEmpty()) {
         return this.left;
       } else {
-        if (this.left instanceof BinaryTreeNode && this.right instanceof EmptyBinaryTree) {
+        if (!this.left.isEmpty() && this.right.isEmpty()) {
           return this.left;
-        } else if (this.right instanceof BinaryTreeNode && this.left instanceof EmptyBinaryTree) {
+        } else if (!this.right.isEmpty() && this.left.isEmpty()) {
           return this.right;
         } else {
           // replace root with smallest child of right subtree
           // remove smallest child of the right subtree
           this.value = minValue(this.right);
-          this.right = this.right.remove(this.value);
+          return new BinaryTreeNode(this.value, this.left, this.right.remove(this.value));
         }
       }
   } else if (x < this.value) {
-    if (this.left instanceof BinaryTreeNode) {
-      this.left = this.left.remove(x);
+    if (!this.left.isEmpty()) {
+      return new BinaryTreeNode(this.value, this.left.remove(x), this.right);
     }
   } else {
-    if (this.right instanceof BinaryTreeNode) {
-      this.right = this.right.remove(x);
+    if (!this.right.isEmpty()) {
+      return new BinaryTreeNode(this.value, this.left, this.right.remove(x));
     }
   }
   return this;
