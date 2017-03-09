@@ -27,22 +27,11 @@ e.g.
 
 Number.prototype.twos = function(n) {
 
-  //let value = Number(this);
-  //let value = this;
   let decToBin = (num, digits) => {
-
-      //console.log(num.toString(2));
       let binStr = num.toString(2);
-      /*while (num > 1) {
-        binStr += (num % 2);
-        num = Math.floor(num / 2);
-      }*/
-      //binStr += num;
-      //console.log(binStr);
       if (binStr.length < digits) {
         binStr = '0'.repeat(digits - binStr.length) + binStr;
       }
-      console.log(binStr);
       return binStr;
   }
 
