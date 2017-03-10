@@ -10,16 +10,17 @@ class BinaryTreeNode extends BinaryTree
     @left.count() + @right.count() + 1
 
   inorder: (fn) ->
-    @left.inorder fn + fn @value + @right.inorder fn
+    @left.inorder(fn) + fn(@value) + @right.inorder(fn)
 
   preorder: (fn) ->
-    fn @value + @left.preorder fn + @right.preorder fn
+    fn(@value) + @left.preorder(fn) + @right.preorder(fn)
 
   postorder: (fn) ->
-    @left.postorder fn + @right.postorder fn + fn @value
+    @left.postorder(fn) + @right.postorder(fn) + fn(@value)
 
   contains: (x) ->
-    @value is x ? true : (x < @value) ? @left.contains(x) : @right.contains(x)
+    if @value is x then true
+    else if x < @value then @left.contains x else @right.contains x
 
   insert: (x) ->
     if x < @value
@@ -32,7 +33,7 @@ class BinaryTreeNode extends BinaryTree
     minValue = (root) ->
       if root.left.isEmpty() then root.value else minValue root.left
 
-    if not this.contains x then this
+    if not this.contains(x) then this
 
     if @value is x
         # empty tree after removal
@@ -56,9 +57,9 @@ class EmptyBinaryTree extends BinaryTree
   isEmpty: () -> true
   depth: () -> 0
   count: () -> 0
-  inorder: (fn) -> fn ''
-  preorder: (fn) -> fn ''
-  postorder: (fn) -> fn ''
+  inorder: (fn) -> ''
+  preorder: (fn) -> ''
+  postorder: (fn) -> ''
   contains: (x) -> false
   insert: (x) -> new BinaryTreeNode x, this, this
   remove: (x) -> this
