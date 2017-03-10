@@ -33,24 +33,24 @@ class BinaryTreeNode extends BinaryTree
     minValue = (root) ->
       if root.left.isEmpty() then root.value else minValue root.left
 
-    if not this.contains(x) then this
+    if not @contains(x) then return @
 
     if @value is x
         # empty tree after removal
-        if @left.isEmpty() and @right.isEmpty() then @left
+        if @left.isEmpty() and @right.isEmpty() then return @left
         else
-          if not @left.isEmpty() and @right.isEmpty() then @left
-          else if not @right.isEmpty() and @left.isEmpty() then @right
+          if not @left.isEmpty() and @right.isEmpty() then return @left
+          else if not @right.isEmpty() and @left.isEmpty() then return @right
           else
             #replace root with smallest child of right subtree
             #remove smallest child of the right subtree
             @value = minValue @right
-            new BinaryTreeNode @value, @left, @right.remove(@value)
+            return new BinaryTreeNode @value, @left, @right.remove(@value)
     else if x < @value
-      if not @left.isEmpty() then new BinaryTreeNode @value, @left.remove(x), @right
+      if not @left.isEmpty() then return new BinaryTreeNode @value, @left.remove(x), @right
     else
-      if not @right.isEmpty() then new BinaryTreeNode @value, @left, @right.remove(x)
-    this;
+      if not @right.isEmpty() then return new BinaryTreeNode @value, @left, @right.remove(x)
+    return @;
 
 class EmptyBinaryTree extends BinaryTree
   constructor: () -> Object.freeze(@)
@@ -61,5 +61,5 @@ class EmptyBinaryTree extends BinaryTree
   preorder: (fn) -> ''
   postorder: (fn) -> ''
   contains: (x) -> false
-  insert: (x) -> new BinaryTreeNode x, this, this
-  remove: (x) -> this
+  insert: (x) -> new BinaryTreeNode x, @, @
+  remove: (x) -> @
