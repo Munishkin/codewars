@@ -5,22 +5,51 @@ class BinaryTreeNode extends BinaryTree
   constructor: (@value, @left, @right) -> Object.freeze(@)
   isEmpty: () -> false
   depth: () ->
-    Math.max(this.left.depth(), this.right.depth()) + 1
+    Math.max(@left.depth(), @right.depth()) + 1
   count: () ->
-    this.left.count() + this.right.count() + 1
+    @left.count() + @right.count() + 1
 
   inorder: (fn) ->
-    this.left.inorder fn + fn this.value + this.right.inorder fn
+    @left.inorder fn + fn @value + @right.inorder fn
 
   preorder: (fn) ->
-    fn this.value + this.left.preorder fn + this.right.preorder fn
+    fn @value + @left.preorder fn + @right.preorder fn
 
   postorder: (fn) ->
-    this.left.postorder fn + this.right.postorder fn + fn this.value
+    @left.postorder fn + @right.postorder fn + fn @value
 
-  contains: (x) -> # implement me
-  insert: (x) -> # implement me
-  remove: (x) -> # implement me
+  contains: (x) ->
+    @value is x ? true : (x < @value) ? @left.contains(x) : @right.contains(x)
+
+  insert: (x) ->
+    if x < @value
+      new BinaryTreeNode @value, @left.insert(x), @right
+    else
+      new BinaryTreeNode @value, @left, @right.insert(x)
+
+  remove: (x) ->
+
+    minValue = (root) ->
+      if root.left.isEmpty() then root.value else minValue root.left
+
+    if not this.contains x then this
+
+    if @value is x
+        # empty tree after removal
+        if @left.isEmpty() and @right.isEmpty() then @left
+        else
+          if not @left.isEmpty() and @right.isEmpty() then @left
+          else if not @right.isEmpty() and @left.isEmpty() then @right
+          else
+            #replace root with smallest child of right subtree
+            #remove smallest child of the right subtree
+            @value = minValue @right
+            new BinaryTreeNode @value, @left, @right.remove(@value)
+    else if x < @value
+      if not @left.isEmpty() then new BinaryTreeNode @value, @left.remove(x), @right
+    else
+      if not @right.isEmpty() then new BinaryTreeNode @value, @left, @right.remove(x)
+    this;
 
 class EmptyBinaryTree extends BinaryTree
   constructor: () -> Object.freeze(@)
