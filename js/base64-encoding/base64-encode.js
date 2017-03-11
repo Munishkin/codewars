@@ -50,9 +50,9 @@ String.prototype.toBase64 = function() {
   bitString += (numSigBytesAtTheEnd === 1 ? '0000' : numSigBytesAtTheEnd === 2 ? '00' : '');
 
   let result = '';
-  for (let i = 0; i < bitString.length; i+=6) {
+  for (let i = 0; i < bitString.length; i+=ENCODE_64_LEN) {
     // convert 6-bit number to base 10 value and look up the character in index table
-    let base10 = parseInt(bitString.substring(i,i+6), 2);
+    let base10 = parseInt(bitString.substring(i,i+ENCODE_64_LEN), 2);
     result += INDEX_TABLE[base10];
   }
 
@@ -62,8 +62,6 @@ String.prototype.toBase64 = function() {
 }
 
 // decode
-
-
 String.prototype.fromBase64 = function() {
 
   // check for pad character =
@@ -96,18 +94,12 @@ String.prototype.fromBase64 = function() {
     return acc;
   }, '');
 
-  if (numPadChar === 2) {
-      // 1 byte, remove last 4 bits
-      bitString = bitString.slice(0, bitString.length - 4);
-  } else if (numPadChar === 1) {
-      // remove last 2 bits
-      bitString = bitString.slice(0, bitString.length - 2);
-  }
+  bitString = bitString.slice(0, bitString.length - numPadChar * 2);
 
   let result = '';
-  for (let i = 0; i < bitString.length; i+=8) {
+  for (let i = 0; i < bitString.length; i+=BYTE_LEN) {
     // convert 6-bit number to base 10 value and look up the character in index table
-    let base10 = parseInt(bitString.substring(i,i+8), 2);
+    let base10 = parseInt(bitString.substring(i,i+BYTE_LEN), 2);
     result += String.fromCharCode(base10);
   }
   return result;
