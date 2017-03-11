@@ -58,7 +58,7 @@ Cons.fromArray = function(array){
   return fromArray(array);
 };
 
-function filter(list, predicate){
+let filter = (list, predicate) => {
   //return a new list containing only elements
   //that satisfy the predicate function.
   if (!list) { return null; }
@@ -70,7 +70,7 @@ function filter(list, predicate){
   return predicate(list.head) ? new Cons(list.head, tailFilter) : tailFilter;
 }
 
-function map(list, mapper){
+let map = (list, mapper) => {
   //TODO: return a new list containing all elements
   //resulting from applying the mapper functiont to them
   if (!list) { return null; }
