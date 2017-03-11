@@ -35,7 +35,7 @@ String.prototype.toBase64 = function() {
   // e) pad the encoded string with = if required
   // f) return final result
 
-  let bitString = String(this).split('').reduce((acc, c, i) => {
+  let bitString = String(this).split('').reduce((acc, c) => {
     // find the ascii value of the character and convert it to binart representation
     let binaryNum = parseInt(c.charCodeAt(0)).toString(2);
     if (binaryNum.length !== BYTE_LEN) {
@@ -48,8 +48,6 @@ String.prototype.toBase64 = function() {
   // add padding zero-bit if number of bytes is not divisible by 3
   // 1 byte requires 4 padding zeroes. 2 bytes require 2 padding zeroes
   bitString += (numSigBytesAtTheEnd === 1 ? '0000' : numSigBytesAtTheEnd === 2 ? '00' : '');
-  //console.log({bitString: bitString, len: bitString.length,
-  //  rem: bitString.length % ENCODE_64_LEN, numChar: bitString.length / ENCODE_64_LEN });
 
   let result = '';
   for (let i = 0; i < bitString.length; i+=6) {
@@ -67,12 +65,60 @@ String.prototype.toBase64 = function() {
 
 
 String.prototype.fromBase64 = function() {
-  return ""
+
+  // check for pad character =
+  // if number of pad characters = 2, the last 24 bits is converted to 1 byte
+  // if number of pad characters = 1, the last 24 bits is converted to 2 bytes
+  // loop the string
+  // a) Find the index of each character in index table
+  // b) convert the index to binary number
+  //    b1) if number of bits >= 6, take the righmost 6 bits
+  //    b2) else prepad the binary number with 0 up to length 6
+  // c) concatenate the string
+  // d) if number of pad character2 = 2, truncate the last 2 zero bits
+  //    if number of pad characters = 1, truncate the last 4 zero bits
+  // e) for each byte, convert binary number to decimal and convert the value from
+  //    ascii to character
+  // f) append the character
+  // g) return result
+
+  let str = String(this);
+  let idxPadChar = str.indexOf('=');
+  let numPadChar = idxPadChar < 0 ? 0 : str.length - idxPadChar;
+
+  str = numPadChar > 0 ? str.slice(0, str.length - numPadChar) : str;
+  let bitString = str.split('').reduce((acc, c) => {
+    let binNum = INDEX_TABLE.indexOf(c).toString(2);
+    if (binNum.length < ENCODE_64_LEN) {
+      binNum = "0".repeat(ENCODE_64_LEN - binNum.length) + binNum;
+    }
+    acc += binNum
+    return acc;
+  }, '');
+
+  if (numPadChar === 2) {
+      // 1 byte, remove last 4 bits
+      bitString = bitString.slice(0, bitString.length - 4);
+  } else if (numPadChar === 1) {
+      // remove last 2 bits
+      bitString = bitString.slice(0, bitString.length - 2);
+  }
+
+  let result = '';
+  for (let i = 0; i < bitString.length; i+=8) {
+    // convert 6-bit number to base 10 value and look up the character in index table
+    let base10 = parseInt(bitString.substring(i,i+8), 2);
+    result += String.fromCharCode(base10);
+  }
+  return result;
 }
 
 console.log('this is a string!!'.toBase64() === 'dGhpcyBpcyBhIHN0cmluZyEh');
 console.log('any carnal pleasure.'.toBase64() === 'YW55IGNhcm5hbCBwbGVhc3VyZS4=');
 console.log('any carnal pleasure'.toBase64() === 'YW55IGNhcm5hbCBwbGVhc3VyZQ==');
-console.log('any carnal pleasur'.toBase64() === '	YW55IGNhcm5hbCBwbGVhc3Vy');
+console.log('any carnal pleasur'.toBase64() === 'YW55IGNhcm5hbCBwbGVhc3Vy');
 
-console.log('dGhpcyBpcyBhIHN0cmluZyEh'.fromBase64() === 'this is a string!!');
+console.log('this is a string!!' === 'dGhpcyBpcyBhIHN0cmluZyEh'.fromBase64());
+console.log('any carnal pleasure.' === 'YW55IGNhcm5hbCBwbGVhc3VyZS4='.fromBase64());
+console.log('any carnal pleasure' === 'YW55IGNhcm5hbCBwbGVhc3VyZQ=='.fromBase64());
+console.log('any carnal pleasur' === 'YW55IGNhcm5hbCBwbGVhc3Vy'.fromBase64());
