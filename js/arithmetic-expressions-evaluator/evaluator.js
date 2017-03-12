@@ -61,11 +61,30 @@ Value.prototype.toString = function(){ return this.value.toString(); };
 var createOperator = (function() {
 
   // Use this space to create any shared functions
-  let eval = () => {
+  let eval = (func, exprLeft, exprRight) => {
+      // accept function,  expression left and expression right
+      // 1) if exprLeft and exprRight are Value, return call the function to obtain
+      // new result and costruct a new Value object.
+      // 2) if one of them is Value and the other is an expression
+      // evaluate the expression, apply function to the intermediate results
+      // and construct a new Value object.
+      // 3) Eval both expressions. Apply the function to intermediate results
+      // and construct a new Vallue object
+      // return the result
 
-      // return an instance of Value
-      let result = new Value();
-      return result;
+      if (exprLeft instanceof Value && exprRight instanceof Value) {
+        return new Value(func(exprLeft.value, exprRight.value));
+      } else if (!(exprLeft instanceof Value) && !(exprRight instanceof Value)) {
+        let resLeft = eval(exprLeft.func, exprLeft.expressions[0], exprLeft.expressions[1]);
+        let resRight = eval(exprRight.func, exprRight.expressions[0], exprRight.expressions[1]);
+        return new Value(func(resLeft.value, resRight.value));
+      } else if (exprLeft instanceof Value) {
+        let resRight = eval(exprRight.func, exprRight.expressions[0], exprRight.expressions[1]);
+        return new Value(func(exprLeft.value, resRight.value));
+      }
+      // right expr is value and left expression is compound expression
+      let resLeft = eval(exprLeft.func, exprLeft.expressions[0], exprLeft.expressions[1]);
+      return new Value(func(resLeft.value, exprRight.value));
   }
 
   // create a helper function for toString to print the compound expressions
@@ -91,13 +110,16 @@ var createOperator = (function() {
     return function() {
       this.expressions = [].slice.call(arguments);
       this.oper = oper;
-
-      console.log(oper + ',' + JSON.stringify(this.expressions));
+      this.func = func;
+//      console.log(oper + ',' + JSON.stringify(this.expressions));
 
       // assign your eval and toString functions here
-      //this.eval = ???
+      this.eval = () => {
+        return eval(this.func, this.expressions[0], this.expressions[1]);
+      }
+
       this.toString = () => {
-        return toString(oper, this.expressions[0], this.expressions[1]);
+        return toString(this.oper, this.expressions[0], this.expressions[1]);
       }
     };
   };
@@ -116,5 +138,5 @@ var exp = new Add(new Mul(new Value(3),new Value(5)),
                                   new Exp(new Value(10),new Value(2))),
                           new Value(273)));
 console.log(exp.toString() === "3 * 5 + 6 / 2 * 10 ^ 2 - 273");
-//console.log(exp.eval().valueOf() === 42);
-//console.log(exp.eval() instanceof Value);
+console.log(exp.eval().valueOf() === 42);
+console.log(exp.eval() instanceof Value);
