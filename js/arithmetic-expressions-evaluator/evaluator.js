@@ -111,9 +111,7 @@ var createOperator = (function() {
       this.expressions = [].slice.call(arguments);
       this.oper = oper;
       this.func = func;
-//      console.log(oper + ',' + JSON.stringify(this.expressions));
 
-      // assign your eval and toString functions here
       this.eval = () => {
         return eval(this.func, this.expressions[0], this.expressions[1]);
       }
