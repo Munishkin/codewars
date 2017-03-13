@@ -37,6 +37,7 @@
 
 //Reference:   https://en.wikipedia.org/wiki/Shunting-yard_algorithm
 //             http://www.sunshine2k.de/coding/java/SimpleParser/SimpleParser.html#ch4
+// https://en.wikipedia.org/wiki/Binary_expression_tree#Postfix_traversal
 let calc = (expression) => {
   // evaluate `expression` and return result
   // replace all space with empty string in expression
@@ -60,7 +61,7 @@ let calc = (expression) => {
   //  Pop the operator out of operator stack and push to output queue
 
   const digits = '0123456789.';
-  const operators = ['+', '-', '*', '/'];
+  const operators = ['+', '-', '*', '/', 'negate'];
 
   let table = {
       '+': { pred: 2, func: (a, b) => { return a + b; } },
@@ -71,13 +72,13 @@ let calc = (expression) => {
                       if (b != 0) { return a / b; }
                       else { return 0; }
                     }
-            }
+            },
+      'negate': { pred: 4, func: (a) => { return -1 * a; } }
   };
 
   expression = expression.replace(/\s/g, '');
   let operStack = [];
   let outputQueue = [];
-  //let postfixString = '';
   let idx = 0;
   let strNum = '';
 
@@ -87,43 +88,45 @@ let calc = (expression) => {
     // tokenize expression to either number (integer or decimal, positive/negative)
     // or operator
     let ch = expression[idx];
-    //console.log({ch: ch});
     // operator found
     if (operators.includes(ch)) {
       // check look ahead
       if (strNum !== '') {
-        //console.log ({strNum: strNum});
         outputQueue.push(new Number(strNum));
-        //console.log({outputQueue: outputQueue});
         strNum = '';
       }
 
-      // determine if it is minus sign of number
+      // determine if it is minus sign or subtract operator
       if (ch === '-') {
-        // look at previous character
-        
-
-      }
-
-
-      if (!tokenNumber) {
-        //console.log ({operStack: operStack});
-        if (operStack.length > 0) {
-          // check the precedence of the top operator
-          let topOper = operStack[operStack.length - 1];
-          //console.log ({ch_pred: table[ch].pred });
-          //console.log ({top_pred: table[topOper] && table[topOper].pred || -1 })
-          while (operStack.length > 0 && table[topOper] &&
-            table[ch].pred <= table[topOper].pred) {
-            // pop the operator in the stack to output queue
-            outputQueue.push(operStack.pop());
+        // look at previous and next characters
+        // next characte is number or ( and previous character is operator or (, then minus sign
+        // otherwise, subtract operator
+        if (idx == 0) {
+          ch = 'negate';   // negate
+        } else {
+          let nextCh = expression[idx+1];
+          let prevCh = expression[idx-1];
+          if ((digits.includes(nextCh) || nextCh === '(' || nextCh === '-') &&
+            (operators.includes(prevCh) || expression[idx-1] === '(')) {
+              ch = 'negate';
           }
         }
-        operStack.push(ch);
-        tokenNumber = true;
-      } else {
-        strNum += ch;   // minus sign of number
       }
+
+      //console.log ({operStack: operStack});
+      if (operStack.length > 0) {
+        // check the precedence of the top operator
+        let topOper = operStack[operStack.length - 1];
+        //console.log ({ch_pred: table[ch].pred });
+        //console.log ({top_pred: table[topOper] && table[topOper].pred || -1 })
+        while (operStack.length > 0 && table[topOper] &&
+          table[ch].pred <= table[topOper].pred) {
+          // pop the operator in the stack to output queue
+          outputQueue.push(operStack.pop());
+        }
+      }
+      operStack.push(ch);
+
     } else if (digits.includes(ch)) { // tokenize number
       strNum += ch
     } else if (ch === '(') {
@@ -132,7 +135,6 @@ let calc = (expression) => {
       if (strNum !== '') {
         outputQueue.push(new Number(strNum));
         strNum = '';
-        tokenNumber = false;  // token operator
       }
       // pop operator in operator stack until ( is detected
       while (operStack.length > 0 && operStack[operStack.length - 1] !== '(') {
@@ -141,8 +143,8 @@ let calc = (expression) => {
       // discard ( parenthesis
       if (operStack.length > 0) { operStack.pop(); }
     }
-     console.log ({output: outputQueue });
-     console.log ({operStack: operStack});
+    // console.log ({output: outputQueue });
+    // console.log ({operStack: operStack});
 
     idx++;
   }
@@ -156,7 +158,7 @@ let calc = (expression) => {
   while (operStack.length > 0) {
     outputQueue.push(operStack.pop());
   }
-  console.log (outputQueue.join(' '));
+//  console.log (outputQueue.join(' '));
 
   // evaluate postfix string
   // Evaluation of postfix notation can also be done easily using a stack.
@@ -169,12 +171,17 @@ let calc = (expression) => {
     let ch = outputQueue.shift();
   //  console.log({ch: ch});
     if (operators.includes(ch)) {
-      let [num2, num1] = [resultStack.pop(), resultStack.pop()];
-      if (table[ch] && table[ch].func) {
-        let subResult = table[ch].func(num1, num2);
+      let num1, num2, subResult;
+      if (ch === 'negate') {
+        num1 = resultStack.pop();
+        subResult = table[ch].func(num1);
+        resultStack.push(subResult);
+      } else {
+        num2 = resultStack.pop();
+        num1 = resultStack.pop();
+        subResult = table[ch].func(num1, num2);
         resultStack.push(subResult);
       }
-//      console.log({operator: ch});
     } else {
       resultStack.push(ch);
     }
@@ -189,19 +196,19 @@ let calc = (expression) => {
 
 
 var tests = [
-  // ['1+1', 2],
-  // ['1 - 1', 0],
-  // ['1* 1', 1],
-  // ['1 /1', 1],
-  // ['-123', -123],
-  // ['123', 123],
-  // ['-30.333 + (20 * 5)/4', -5.333],
-  // ['2 /2+3 * 4.75- -6', 21.25],
-  // ['12* 123', 1476],
-  // ['2 / (2 + 3) * 4.33 - -6', 7.732],
-  // ['2 / (2 + 3) * (4.33 - -6)', 4.132],
+  ['1+1', 2],
+  ['1 - 1', 0],
+  ['1* 1', 1],
+  ['1 /1', 1],
+  ['-123', -123],
+  ['123', 123],
+  ['-30.333 + (20 * 5)/4', -5.333],
+  ['2 /2+3 * 4.75- -6', 21.25],
+  ['12* 123', 1476],
+  ['2 / (2 + 3) * 4.33 - -6', 7.732],
+  ['2 / (2 + 3) * (4.33 - -6)', 4.132],
   ['6 + -( -4)', 10],
-  // ['1 - -1', 2],
+  ['6 + -(4)', 2]
 ];
 
 tests.forEach(function (m) {
