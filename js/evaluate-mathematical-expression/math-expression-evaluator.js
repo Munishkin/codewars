@@ -100,6 +100,10 @@ let calc = (expression) => {
         // look at previous and next characters
         // next characte is number or ( and previous character is operator or (, then minus sign
         // otherwise, subtract operator
+        // grammar of unary:
+        // unary := number
+        // unary := '-' + unary
+
         if (idx == 0) {
           ch = 'negate';   // negate
         } else {
@@ -143,9 +147,6 @@ let calc = (expression) => {
       // discard ( parenthesis
       if (operStack.length > 0) { operStack.pop(); }
     }
-    // console.log ({output: outputQueue });
-    // console.log ({operStack: operStack});
-
     idx++;
   }
 
@@ -158,7 +159,7 @@ let calc = (expression) => {
   while (operStack.length > 0) {
     outputQueue.push(operStack.pop());
   }
-  console.log (outputQueue.join(' '));
+//  console.log (outputQueue.join(' '));
 
   // evaluate postfix string
   // Evaluation of postfix notation can also be done easily using a stack.
@@ -185,9 +186,7 @@ let calc = (expression) => {
     } else {
       resultStack.push(ch);
     }
-//    console.log ({resultStack: resultStack});
   }
-  //console.log({resultStack: resultStack});
   let result = resultStack.pop().valueOf();
   console.log({result: result});
 
@@ -202,11 +201,9 @@ var tests = [
   ['1 /1', 1],
   ['-123', -123],
   ['123', 123],
-  ['-30.333 + (20 * 5)/4', -5.333],
   ['2 /2+3 * 4.75- -6', 21.25],
   ['12* 123', 1476],
   ['2 / (2 + 3) * 4.33 - -6', 7.732],
-  ['2 / (2 + 3) * (4.33 - -6)', 4.132],
   ['6 + -( -4)', 10],
   ['6 + -(4)', 2],
   ['12* 123/-(-5 + 2)', 492],
