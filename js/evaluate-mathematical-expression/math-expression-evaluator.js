@@ -47,8 +47,9 @@ let calc = (expression) => {
   //    If the token is a number, then push it to the output queue.
   //    If the token is an operator, o1, then:
   //      while there is an operator token o2, at the top of the operator stack and either
-  //         o1 is left-associative and its precedence is less than or equal to that of o2
-  //         pop o2 off the operator stack and push to output queue
+  //         o1 is left-associative and its precedence is less than or equal to that of o2 , or
+  //         o1 is right associative, and has precedence less than that of o2,
+  //            pop o2 off the operator stack and push to output queue
   //      at the end of iteration push o1 onto the operator stack.
   // If the token is a left parenthesis (i.e. "("), then push it onto the operator stack.
   // If the token is a right parenthesis (i.e. ")"):
@@ -63,16 +64,16 @@ let calc = (expression) => {
   const operators = ['+', '-', '*', '/', 'negate'];
 
   let table = {
-      '+': { pred: 2, func: (a, b) => { return a + b; } },
-      '-': { pred: 2, func: (a, b) => { return a - b; } },
-      '*': { pred: 3, func: (a, b) => { return a * b; } },
+      '+': { pred: 2, func: (a, b) => { return a + b; }, assoc: "left" },
+      '-': { pred: 2, func: (a, b) => { return a - b; }, assoc: "left" },
+      '*': { pred: 3, func: (a, b) => { return a * b; }, assoc: "left" },
       '/': { pred: 3,
              func: (a, b) => {
                       if (b != 0) { return a / b; }
                       else { return 0; }
                     }
-            },
-      'negate': { pred: 4, func: (a) => { return -1 * a; } }
+            }, assoc: "left",
+      'negate': { pred: 4, func: (a) => { return -1 * a; }, assoc: "right" }
   };
 
   expression = expression.replace(/\s/g, '');
@@ -147,6 +148,8 @@ let calc = (expression) => {
       // discard ( parenthesis
       if (operStack.length > 0) { operStack.pop(); }
     }
+    console.log({operStack, operStack});
+    console.log({outputQueue, outputQueue});
     idx++;
   }
 
@@ -159,7 +162,7 @@ let calc = (expression) => {
   while (operStack.length > 0) {
     outputQueue.push(operStack.pop());
   }
-//  console.log (outputQueue.join(' '));
+  console.log (outputQueue.join(' '));
 
   // evaluate postfix string
   // Evaluation of postfix notation can also be done easily using a stack.
@@ -186,6 +189,7 @@ let calc = (expression) => {
     } else {
       resultStack.push(ch);
     }
+    console.log({resultStack: resultStack});
   }
   let result = resultStack.pop().valueOf();
   console.log({result: result});
@@ -195,22 +199,25 @@ let calc = (expression) => {
 
 
 var tests = [
-  ['1+1', 2],
-  ['1 - 1', 0],
-  ['1* 1', 1],
-  ['1 /1', 1],
-  ['-123', -123],
-  ['123', 123],
-  ['2 /2+3 * 4.75- -6', 21.25],
-  ['12* 123', 1476],
-  ['2 / (2 + 3) * 4.33 - -6', 7.732],
-  ['6 + -( -4)', 10],
-  ['6 + -(4)', 2],
-  ['12* 123/-(-5 + 2)', 492],
-  ['12* 123/(-5 + 2)', -492],
-  ['(123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) - (123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) + (13 - 2)/ -(-11)', 1],
-  ['((2.33 / (2.9+3.5)*4) - -6)', 7.45625],
-  ['123.45*(678.90 / (-2.5+ 11.5)-(80 -19) *33.25) / 20 + 11', -12042.760875],
+  // ['1+1', 2],
+  // ['1 - 1', 0],
+  // ['1* 1', 1],
+  // ['1 /1', 1],
+  // ['-123', -123],
+  // ['123', 123],
+  // ['2 /2+3 * 4.75- -6', 21.25],
+  // ['12* 123', 1476],
+  // ['2 / (2 + 3) * 4.33 - -6', 7.732],
+  // ['6 + -( -4)', 10],
+  // ['6 + -(4)', 2],
+  // ['12* 123/-(-5 + 2)', 492],
+  // ['12* 123/(-5 + 2)', -492],
+  // ['(123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) - (123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) + (13 - 2)/ -(-11)', 1],
+  // ['((2.33 / (2.9+3.5)*4) - -6)', 7.45625],
+  // ['123.45*(678.90 / (-2.5+ 11.5)-(80 -19) *33.25) / 20 + 11', -12042.760875],
+  // ['1- -1', 2],
+  // ['1 - -1', 2],
+  ['1--(--1)', 2],
 ];
 
 tests.forEach(function (m) {
