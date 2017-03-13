@@ -37,7 +37,6 @@
 
 //Reference:   https://en.wikipedia.org/wiki/Shunting-yard_algorithm
 //             http://www.sunshine2k.de/coding/java/SimpleParser/SimpleParser.html#ch4
-// https://en.wikipedia.org/wiki/Binary_expression_tree#Postfix_traversal
 let calc = (expression) => {
   // evaluate `expression` and return result
   // replace all space with empty string in expression
@@ -117,12 +116,13 @@ let calc = (expression) => {
       if (operStack.length > 0) {
         // check the precedence of the top operator
         let topOper = operStack[operStack.length - 1];
-        //console.log ({ch_pred: table[ch].pred });
-        //console.log ({top_pred: table[topOper] && table[topOper].pred || -1 })
+        // console.log ({ch_pred: table[ch].pred });
+        // console.log ({top_pred: table[topOper] && table[topOper].pred || -1 })
         while (operStack.length > 0 && table[topOper] &&
           table[ch].pred <= table[topOper].pred) {
           // pop the operator in the stack to output queue
           outputQueue.push(operStack.pop());
+          topOper = operStack[operStack.length - 1];
         }
       }
       operStack.push(ch);
@@ -158,7 +158,7 @@ let calc = (expression) => {
   while (operStack.length > 0) {
     outputQueue.push(operStack.pop());
   }
-//  console.log (outputQueue.join(' '));
+  console.log (outputQueue.join(' '));
 
   // evaluate postfix string
   // Evaluation of postfix notation can also be done easily using a stack.
@@ -208,7 +208,12 @@ var tests = [
   ['2 / (2 + 3) * 4.33 - -6', 7.732],
   ['2 / (2 + 3) * (4.33 - -6)', 4.132],
   ['6 + -( -4)', 10],
-  ['6 + -(4)', 2]
+  ['6 + -(4)', 2],
+  ['12* 123/-(-5 + 2)', 492],
+  ['12* 123/(-5 + 2)', -492],
+  ['(123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) - (123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) + (13 - 2)/ -(-11)', 1],
+  ['((2.33 / (2.9+3.5)*4) - -6)', 7.45625],
+  ['123.45*(678.90 / (-2.5+ 11.5)-(80 -19) *33.25) / 20 + 11', -12042.760875],
 ];
 
 tests.forEach(function (m) {
