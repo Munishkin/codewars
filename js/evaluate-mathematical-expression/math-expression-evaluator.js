@@ -172,7 +172,6 @@ let calc = (expression) => {
   return resultStack.pop().valueOf();
 };
 
-
 var tests = [
   ['1+1', 2],
   ['1 - 1', 0],
