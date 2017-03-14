@@ -67,11 +67,9 @@ let calc = (expression) => {
       '+': { pred: 2, func: (a, b) => { return a + b; }, assoc: "left" },
       '-': { pred: 2, func: (a, b) => { return a - b; }, assoc: "left" },
       '*': { pred: 3, func: (a, b) => { return a * b; }, assoc: "left" },
-      '/': { pred: 3,
-             func: (a, b) => {
-                      if (b != 0) { return a / b; }
-                      else { return 0; }
-                    }
+      '/': { pred: 3, func: (a, b) => {
+                        if (b != 0) { return a / b; } else { return 0; }
+                      }
             }, assoc: "left",
       'negate': { pred: 4, func: (a) => { return -1 * a; }, assoc: "right" }
   };
@@ -104,7 +102,6 @@ let calc = (expression) => {
         // grammar of unary:
         // unary := number
         // unary := '-' + unary
-
         if (idx == 0) {
           ch = 'negate';   // negate
         } else {
@@ -117,21 +114,18 @@ let calc = (expression) => {
         }
       }
 
-      //console.log ({operStack: operStack});
       if (operStack.length > 0) {
         // check the precedence of the top operator
         let topOper = operStack[operStack.length - 1];
-        // console.log ({ch_pred: table[ch].pred });
-        // console.log ({top_pred: table[topOper] && table[topOper].pred || -1 })
         while (operStack.length > 0 && table[topOper] &&
-          table[ch].pred <= table[topOper].pred) {
+          ((table[ch].assoc === 'left' && table[ch].pred <= table[topOper].pred) ||
+          (table[ch].assoc === 'right' && table[ch].pred < table[topOper].pred))) {
           // pop the operator in the stack to output queue
           outputQueue.push(operStack.pop());
           topOper = operStack[operStack.length - 1];
         }
       }
       operStack.push(ch);
-
     } else if (digits.includes(ch)) { // tokenize number
       strNum += ch
     } else if (ch === '(') {
@@ -148,8 +142,6 @@ let calc = (expression) => {
       // discard ( parenthesis
       if (operStack.length > 0) { operStack.pop(); }
     }
-    console.log({operStack, operStack});
-    console.log({outputQueue, outputQueue});
     idx++;
   }
 
@@ -162,7 +154,6 @@ let calc = (expression) => {
   while (operStack.length > 0) {
     outputQueue.push(operStack.pop());
   }
-  console.log (outputQueue.join(' '));
 
   // evaluate postfix string
   // Evaluation of postfix notation can also be done easily using a stack.
@@ -173,7 +164,6 @@ let calc = (expression) => {
   let resultStack = [];
   while (outputQueue.length > 0) {
     let ch = outputQueue.shift();
-  //  console.log({ch: ch});
     if (operators.includes(ch)) {
       let num1, num2, subResult;
       if (ch === 'negate') {
@@ -189,34 +179,30 @@ let calc = (expression) => {
     } else {
       resultStack.push(ch);
     }
-    console.log({resultStack: resultStack});
   }
-  let result = resultStack.pop().valueOf();
-  console.log({result: result});
-
-  return result;
+  return resultStack.pop().valueOf();
 };
 
 
 var tests = [
-  // ['1+1', 2],
-  // ['1 - 1', 0],
-  // ['1* 1', 1],
-  // ['1 /1', 1],
-  // ['-123', -123],
-  // ['123', 123],
-  // ['2 /2+3 * 4.75- -6', 21.25],
-  // ['12* 123', 1476],
-  // ['2 / (2 + 3) * 4.33 - -6', 7.732],
-  // ['6 + -( -4)', 10],
-  // ['6 + -(4)', 2],
-  // ['12* 123/-(-5 + 2)', 492],
-  // ['12* 123/(-5 + 2)', -492],
-  // ['(123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) - (123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) + (13 - 2)/ -(-11)', 1],
-  // ['((2.33 / (2.9+3.5)*4) - -6)', 7.45625],
-  // ['123.45*(678.90 / (-2.5+ 11.5)-(80 -19) *33.25) / 20 + 11', -12042.760875],
-  // ['1- -1', 2],
-  // ['1 - -1', 2],
+  ['1+1', 2],
+  ['1 - 1', 0],
+  ['1* 1', 1],
+  ['1 /1', 1],
+  ['-123', -123],
+  ['123', 123],
+  ['2 /2+3 * 4.75- -6', 21.25],
+  ['12* 123', 1476],
+  ['2 / (2 + 3) * 4.33 - -6', 7.732],
+  ['6 + -( -4)', 10],
+  ['6 + -(4)', 2],
+  ['12* 123/-(-5 + 2)', 492],
+  ['12* 123/(-5 + 2)', -492],
+  ['(123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) - (123.45*(678.90 / (-2.5+ 11.5)-(((80 -(19))) *33.25)) / 20) + (13 - 2)/ -(-11)', 1],
+  ['((2.33 / (2.9+3.5)*4) - -6)', 7.45625],
+  ['123.45*(678.90 / (-2.5+ 11.5)-(80 -19) *33.25) / 20 + 11', -12042.760875],
+  ['1- -1', 2],
+  ['1 - -1', 2],
   ['1--(--1)', 2],
 ];
 
