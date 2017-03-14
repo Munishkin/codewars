@@ -62,8 +62,7 @@ let calc = (expression) => {
 
   const digits = '0123456789.';
   const operators = ['+', '-', '*', '/', 'negate'];
-
-  let table = {
+  const table = {
       '+': { pred: 2, func: (a, b) => { return a + b; }, assoc: "left" },
       '-': { pred: 2, func: (a, b) => { return a - b; }, assoc: "left" },
       '*': { pred: 3, func: (a, b) => { return a * b; }, assoc: "left" },
@@ -146,14 +145,8 @@ let calc = (expression) => {
   }
 
   // push last number token
-  if (strNum !== '') {
-    outputQueue.push(new Number(strNum));
-  }
-
-  // output stack is non-empty, pop all operators to output queue
-  while (operStack.length > 0) {
-    outputQueue.push(operStack.pop());
-  }
+  if (strNum !== '') { outputQueue.push(new Number(strNum)); }
+  outputQueue = outputQueue.concat(operStack.reverse())
 
   // evaluate postfix string
   // Evaluation of postfix notation can also be done easily using a stack.
@@ -167,14 +160,10 @@ let calc = (expression) => {
     if (operators.includes(ch)) {
       let num1, num2, subResult;
       if (ch === 'negate') {
-        num1 = resultStack.pop();
-        subResult = table[ch].func(num1);
-        resultStack.push(subResult);
+        resultStack.push(table[ch].func(resultStack.pop()));
       } else {
-        num2 = resultStack.pop();
-        num1 = resultStack.pop();
-        subResult = table[ch].func(num1, num2);
-        resultStack.push(subResult);
+        let [num2, num1] = [resultStack.pop(), resultStack.pop()];
+        resultStack.push(table[ch].func(num1, num2));
       }
     } else {
       resultStack.push(ch);
