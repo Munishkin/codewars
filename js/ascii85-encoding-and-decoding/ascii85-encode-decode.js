@@ -20,12 +20,15 @@
 // If the last block to be encoded contains less than four bytes, it's padded
 // with nulls to a total length of four bytes, and then after encoding, the
 // same number of characters are removed as were added in the padding step.
+
 // If a block to be encoded contains all nulls, then that block is encoded as
 // a simple z (ASCII 122) rather than the fully-encoded value of !!!!!.
+
 // The final encoded value is surrounded by <~ at the start and ~> at the end.
 // In the wild, whitespace can be inserted as needed (e.g., line breaks for
 // mail transport agents); in this kata, whitespace shouldn't be added to the
 // final encoded value for the sake of checking the fidelity of the encoding.
+
 // Decoding applies the above in reverse; each block of five encoded characters
 // is taken as its ASCII character codes, multiplied by powers of 85 according
 // to the position in the block of five characters (again, see the Wikipedia
@@ -39,10 +42,68 @@
 // the encoded data before the data is broken up into the five-character
 // blocks to be decoded).
 
+const ASCII85 = 85;
+const ASCII85_OFFSET = 33;
+const ASCII85_BLOCK_SIZE = 5;
+const BINARY_BLOCK_SIZE = 4;
+const BYTE_SIZE = 8;
+const ASCII85_POW = [52200625, 614125, 7225, 85, 1];
 
 String.prototype.toAscii85 = function() {
   // encode this string as ASCII85
-  return '';
+  // check if length is divisble by 4. if not pad by zero bytes
+  // divide the string by block of 4
+  // convert the ascii value of each character to binary and concatenate together
+  // calculate the binary value
+  // encode the binary into ascii85 values of size 5
+  //   ascii85 byte 0 = (value / 85^4) mod 85 + 33
+  //   ascii85 byte 1 = (value / 85^3) mod 85 + 33
+  //   ascii85 byte 2 = (value / 85^2) mod 85 + 33
+  //   ascii85 byte 3 = (value / 85^1) mod 85 + 33
+  //   ascii85 byte 4 = (value / 85^0) mod 85 + 33
+  // convert each ascii value to character
+  // if encoded value is '!!!!!', replace it with z
+  // return result
+  //let val = JSON.parse(JSON.stringify(this.valueOf()));
+  let encodeAscii = (binBlock) => {
+    let base10 = parseInt(binBlock, 2);
+    let encodeValues = [];
+    for (k = 0; k < ASCII85_BLOCK_SIZE; k++) {
+      let ascii85Value = Math.floor(base10 / ASCII85_POW[k]) % ASCII85 + ASCII85_OFFSET;
+      encodeValues.push(ascii85Value);
+    }
+    let encodeBlock = String.fromCharCode(...encodeValues);
+    return encodeBlock === '!!!!!' ? 'z' : encodeBlock;
+  }
+
+  let val = this.valueOf();
+  let result = '', i = 0, binBlock = '';
+  for (i = 0; i <= val.length - BINARY_BLOCK_SIZE; i+=BINARY_BLOCK_SIZE) {
+    binBlock = '';
+    for (let j = i; j < i + BINARY_BLOCK_SIZE; j++) {
+      // prepend with 0 if length is less than 8
+      let binary = val.charCodeAt(j).toString(2);
+      binBlock += (binary.length < BYTE_SIZE) ?
+          "0".repeat(BYTE_SIZE - binary.length) + binary : binary;
+    }
+    result += encodeAscii(binBlock);
+  }
+
+  // pad incomplete last block if exists
+  let numPadChar = (BINARY_BLOCK_SIZE - (val.length % BINARY_BLOCK_SIZE)) % BINARY_BLOCK_SIZE;
+  if (numPadChar !== 0) {
+    binBlock = '';
+    for (let j = i; j < val.length; j++) {
+      // prepend with 0 if length is less than 8
+      let binary = val.charCodeAt(j).toString(2);
+      binBlock += (binary.length < BYTE_SIZE) ?
+          "0".repeat(BYTE_SIZE - binary.length) + binary : binary;
+    }
+    binBlock += "00000000".repeat(numPadChar);
+    result += encodeAscii(binBlock);
+    result = result.substring(0, result.length - numPadChar);
+  }
+  return `<~${result}~>`;
 }
 
 String.prototype.fromAscii85 = function() {
@@ -54,8 +115,11 @@ console.log('co'.toAscii85() === '<~@rD~>');
 console.log('easy'.toAscii85() === '<~ARTY*~>');
 console.log('moderate'.toAscii85() ===  '<~D/WrrEaa\'$~>');
 console.log('somewhat difficult'.toAscii85() === '<~F)Po,GA(E,+Co1uAnbatCif~>');
+let longString = 'Man is distinguished, not only by his reason, but by this singular passion from other animals, which is a lust of the mind, that by a perseverance of delight in the continued and indefatigable generation of knowledge, exceeds the short vehemence of any carnal pleasure.';
+let longResult = '<~9jqo^BlbD-BleB1DJ+*+F(f,q/0JhKF<GL>Cj@.4Gp$d7F!,L7@<6@)/0JDEF<G%<+EV:2F!,O<DJ+*.@<*K0@<6L(Df-\\0Ec5e;DffZ(EZee.Bl.9pF"AGXBPCsi+DGm>@3BB/F*&OCAfu2/AKYi(DIb:@FD,*)+C]U=@3BN#EcYf8ATD3s@q?d$AftVqCh[NqF<G:8+EV:.+Cf>-FD5W8ARlolDIal(DId<j@<?3r@:F%a+D58\'ATD4$Bl@l3De:,-DJs`8ARoFb/0JMK@qB4^F!,R<AKZ&-DfTqBG%G>uD.RTpAKYo\'+CT/5+Cei#DII?(E,9)oF*2M7/c~>'
+console.log(longString.toAscii85() === longResult);
 
-console.log('<~@rD~>'.fromAscii85() === 'co');
-console.log('<~ARTY*~>'.fromAscii85() === 'easy');
-console.log('<~D/WrrEaa\'$~>'.fromAscii85() === 'moderate');
-console.log('<~F)Po,GA(E,+Co1uAnbatCif~>'.fromAscii85() === 'somewhat difficult');
+// console.log('<~@rD~>'.fromAscii85() === 'co');
+// console.log('<~ARTY*~>'.fromAscii85() === 'easy');
+// console.log('<~D/WrrEaa\'$~>'.fromAscii85() === 'moderate');
+// console.log('<~F)Po,GA(E,+Co1uAnbatCif~>'.fromAscii85() === 'somewhat difficult');
