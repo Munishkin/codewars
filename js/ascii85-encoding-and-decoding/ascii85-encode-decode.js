@@ -76,30 +76,28 @@ String.prototype.toAscii85 = function() {
     return encodeBlock === '!!!!!' ? 'z' : encodeBlock;
   }
 
-  let val = this.valueOf();
-  let result = '', i = 0, binBlock = '';
-  for (i = 0; i <= val.length - BINARY_BLOCK_SIZE; i+=BINARY_BLOCK_SIZE) {
-    binBlock = '';
-    for (let j = i; j < i + BINARY_BLOCK_SIZE; j++) {
+  let conversion = (val, beginIdx, endIdx) => {
+    let binBlock = '';
+    for (let j = beginIdx; j < endIdx; j++) {
       // prepend with 0 if length is less than 8
       let binary = val.charCodeAt(j).toString(2);
       binBlock += (binary.length < BYTE_SIZE) ?
           "0".repeat(BYTE_SIZE - binary.length) + binary : binary;
     }
-    result += encodeAscii(binBlock);
+    return binBlock;
+  }
+
+  let val = this.valueOf();
+  let result = '';
+  for (let i = 0; i <= val.length - BINARY_BLOCK_SIZE; i+=BINARY_BLOCK_SIZE) {
+    result += encodeAscii(conversion(val, i, i + BINARY_BLOCK_SIZE));
   }
 
   // pad incomplete last block if exists
   let numPadChar = (BINARY_BLOCK_SIZE - (val.length % BINARY_BLOCK_SIZE)) % BINARY_BLOCK_SIZE;
   if (numPadChar !== 0) {
-    binBlock = '';
-    for (let j = i; j < val.length; j++) {
-      // prepend with 0 if length is less than 8
-      let binary = val.charCodeAt(j).toString(2);
-      binBlock += (binary.length < BYTE_SIZE) ?
-          "0".repeat(BYTE_SIZE - binary.length) + binary : binary;
-    }
-    binBlock += "00000000".repeat(numPadChar);
+    let offset =  BINARY_BLOCK_SIZE - numPadChar;
+    let binBlock = conversion(val, val.length - offset, val.length) + "00000000".repeat(numPadChar);
     result += encodeAscii(binBlock);
     result = result.substring(0, result.length - numPadChar);
   }
