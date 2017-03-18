@@ -52,7 +52,7 @@ const ASCII85_POW = [52200625, 614125, 7225, 85, 1];
 String.prototype.toAscii85 = function() {
   // encode this string as ASCII85
   // check if length is divisble by 4. if not pad by zero bytes
-  // divide the string by block of 4
+  // divide the string into blocks of size 4
   // convert the ascii value of each character to binary and concatenate together
   // calculate the binary value
   // encode the binary into ascii85 values of size 5
@@ -64,18 +64,14 @@ String.prototype.toAscii85 = function() {
   // convert each ascii value to character
   // if encoded value is '!!!!!', replace it with z
   // return result
-  //let val = JSON.parse(JSON.stringify(this.valueOf()));
-  let encodeAscii = (binBlock) => {
-    let base10 = parseInt(binBlock, 2);
-    let encodeValues = [];
-    for (k = 0; k < ASCII85_BLOCK_SIZE; k++) {
-      let ascii85Value = Math.floor(base10 / ASCII85_POW[k]) % ASCII85 + ASCII85_OFFSET;
-      encodeValues.push(ascii85Value);
-    }
-    return String.fromCharCode(...encodeValues);
+  const encodeAscii = (binBlock) => {
+    const base10 = parseInt(binBlock, 2);
+    return ASCII85_POW.reduce((acc, pow) => {
+      return acc + String.fromCharCode(Math.floor(base10 / pow) % ASCII85 + ASCII85_OFFSET);
+    }, '');
   }
 
-  let conversion = (val, beginIdx, endIdx) => {
+  const conversion = (val, beginIdx, endIdx) => {
     let binBlock = '';
     for (let j = beginIdx; j < endIdx; j++) {
       // prepend with 0 if length is less than 8
@@ -86,7 +82,7 @@ String.prototype.toAscii85 = function() {
     return binBlock;
   }
 
-  let val = this.valueOf();
+  const val = this.valueOf();
   let result = '';
   for (let i = 0; i <= val.length - BINARY_BLOCK_SIZE; i+=BINARY_BLOCK_SIZE) {
     let encodeBlock = encodeAscii(conversion(val, i, i + BINARY_BLOCK_SIZE));
