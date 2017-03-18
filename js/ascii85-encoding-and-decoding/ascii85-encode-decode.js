@@ -71,29 +71,30 @@ String.prototype.toAscii85 = function() {
     }, '');
   }
 
+  // endIdx is exclusive
   const conversion = (val, beginIdx, endIdx) => {
-    let binBlock = '';
-    for (let j = beginIdx; j < endIdx; j++) {
-      // prepend with 0 if length is less than 8
-      let binary = val.charCodeAt(j).toString(2);
-      binBlock += (binary.length < BYTE_SIZE) ?
-          "0".repeat(BYTE_SIZE - binary.length) + binary : binary;
-    }
-    return binBlock;
+    return Array(endIdx - beginIdx).fill(beginIdx)
+        .map((a, i) => { return a + i; })
+        .reduce((acc, i) => {
+          let binary = val.charCodeAt(i).toString(2);
+          return acc + ((binary.length < BYTE_SIZE) ?
+              "0".repeat(BYTE_SIZE - binary.length) : '') + binary;
+        }, '');
   }
 
   const val = this.valueOf();
-  let result = '';
-  for (let i = 0; i <= val.length - BINARY_BLOCK_SIZE; i+=BINARY_BLOCK_SIZE) {
-    let encodeBlock = encodeAscii(conversion(val, i, i + BINARY_BLOCK_SIZE));
-    result += encodeBlock === '!!!!!' ? 'z' : encodeBlock;
-  }
+  let result = Array(Math.floor(val.length / BINARY_BLOCK_SIZE))
+      .fill().map((_, i) => { return i * BINARY_BLOCK_SIZE; })
+      .reduce((acc, i) => {
+        let encodeBlock = encodeAscii(conversion(val, i, i+BINARY_BLOCK_SIZE));
+        return acc +  (encodeBlock === '!!!!!' ? 'z' : encodeBlock);
+      }, '');
 
   // pad incomplete last block if exists
   let numPadChar = (BINARY_BLOCK_SIZE - (val.length % BINARY_BLOCK_SIZE)) % BINARY_BLOCK_SIZE;
   if (numPadChar !== 0) {
-    let offset =  BINARY_BLOCK_SIZE - numPadChar;
-    let binBlock = conversion(val, val.length - offset, val.length) + "00000000".repeat(numPadChar);
+    let binBlock = conversion(val, val.length - BINARY_BLOCK_SIZE + numPadChar, val.length)
+                    + "00000000".repeat(numPadChar);
     result += encodeAscii(binBlock);
     result = result.substring(0, result.length - numPadChar);
   }
