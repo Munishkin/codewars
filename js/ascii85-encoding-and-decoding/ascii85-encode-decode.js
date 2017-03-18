@@ -63,6 +63,8 @@ String.prototype.toAscii85 = function() {
   //   ascii85 byte 4 = (value / 85^0) mod 85 + 33
   // convert each ascii value to character
   // if encoded value is '!!!!!', replace it with z
+  // if last block does not have length 4, append '00000000' to make it 32 bits long
+  // then repeat the same step to do the ascii85 conversion
   // return result
   const encodeAscii = (binBlock) => {
     const base10 = parseInt(binBlock, 2);
@@ -102,7 +104,23 @@ String.prototype.toAscii85 = function() {
 }
 
 String.prototype.fromAscii85 = function() {
+
+  const NULL_BLOCK = '\u0000\u0000\u0000\u0000';
+
   // decode this string from ASCII85
+  // if ascii85 character is z then, append \u0000\u0000\u0000\u0000 to result string
+  // Otherwise, retrieve the next 5 characters to form an ascii85 block
+  // calculate the base 10 value of the ascii85 block
+  //   ascii85 byte 0 = (value0 - 33) * 85^4)
+  //   ascii85 byte 1 = (value1 - 33) * 85^3)
+  //   ascii85 byte 2 = (value2 - 33) * 85^2)
+  //   ascii85 byte 3 = (value3 - 33) * 85)
+  //   ascii85 byte 4 = (value4 - 33)
+  // convert the base 10 value to 32-bit binary
+  // Convert each byte to ascii character and append it to result string
+  // if last block does not have length 5, append 'u' to make it 5 characters long
+  // then repeat the same step to do the ascii85 conversion
+  // return result
   return '';
 }
 
@@ -118,11 +136,11 @@ let longString = 'Man is distinguished, not only by his reason, but by this sing
 let longResult = '<~9jqo^BlbD-BleB1DJ+*+F(f,q/0JhKF<GL>Cj@.4Gp$d7F!,L7@<6@)/0JDEF<G%<+EV:2F!,O<DJ+*.@<*K0@<6L(Df-\\0Ec5e;DffZ(EZee.Bl.9pF"AGXBPCsi+DGm>@3BB/F*&OCAfu2/AKYi(DIb:@FD,*)+C]U=@3BN#EcYf8ATD3s@q?d$AftVqCh[NqF<G:8+EV:.+Cf>-FD5W8ARlolDIal(DId<j@<?3r@:F%a+D58\'ATD4$Bl@l3De:,-DJs`8ARoFb/0JMK@qB4^F!,R<AKZ&-DfTqBG%G>uD.RTpAKYo\'+CT/5+Cei#DII?(E,9)oF*2M7/c~>'
 console.log(longString.toAscii85() === longResult);
 
-// console.log("<~!!~>".fromAscii85() === "\u0000");
-// console.log("<~!!!~>".fromAscii85() === "\u0000\u0000");
-// console.log("<~!!!!~>".fromAscii85() === "\u0000\u0000\u0000");
-// console.log("<~z~>".fromAscii85() === "\u0000\u0000\u0000\u0000");
-// console.log('<~@rD~>'.fromAscii85() === 'co');
-// console.log('<~ARTY*~>'.fromAscii85() === 'easy');
-// console.log('<~D/WrrEaa\'$~>'.fromAscii85() === 'moderate');
-// console.log('<~F)Po,GA(E,+Co1uAnbatCif~>'.fromAscii85() === 'somewhat difficult');
+console.log("<~!!~>".fromAscii85() === "\u0000");
+console.log("<~!!!~>".fromAscii85() === "\u0000\u0000");
+console.log("<~!!!!~>".fromAscii85() === "\u0000\u0000\u0000");
+console.log("<~z~>".fromAscii85() === "\u0000\u0000\u0000\u0000");
+console.log('<~@rD~>'.fromAscii85() === 'co');
+console.log('<~ARTY*~>'.fromAscii85() === 'easy');
+console.log('<~D/WrrEaa\'$~>'.fromAscii85() === 'moderate');
+console.log('<~F)Po,GA(E,+Co1uAnbatCif~>'.fromAscii85() === 'somewhat difficult');
