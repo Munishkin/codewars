@@ -74,6 +74,7 @@ String.prototype.toAscii85 = function() {
   }
 
   // endIdx is exclusive
+  // convert from ascii to binary
   const conversion = (val, beginIdx, endIdx) => {
     return Array(endIdx - beginIdx).fill(beginIdx)
         .map((a, i) => { return a + i; })
@@ -122,13 +123,12 @@ String.prototype.fromAscii85 = function() {
   // return result
   const NULL_BLOCK = '\u0000\u0000\u0000\u0000';
 
-  const encodeBinary = (val, i) => {
+  const encodeBinary = (val, charIdx) => {
     // make 32-bit binary string
-    let base10 = ASCII85_POW.reduce((acc, p, j) => {
-      return acc + (val[i+j] - ASCII85_OFFSET) * p);
-    }, 0);
-    const binary = base10.toString(2);
-    // make 32-bit binary string
+    const binary = ASCII85_POW.reduce((acc, p, j) => {
+      return acc + ((val.charCodeAt(charIdx+j) - ASCII85_OFFSET) * p);
+    }, 0).toString(2);
+//    const binary = base10.toString(2);
     const numZeroFilled = BINARY_BLOCK_SIZE * BYTE_SIZE - binary.length;
     return (numZeroFilled > 0 ? "0".repeat(numZeroFilled) : '') + binary;
   }
@@ -138,53 +138,55 @@ String.prototype.fromAscii85 = function() {
     return Array(BINARY_BLOCK_SIZE).fill()
         .map((_, i) => { return i * BYTE_SIZE; })  // return 0, 8, 16, 24
         .reduce((acc, i) => {
-          let binary = binBlock.substring(i, i + BYTE_SIZE).parseInt(2);
+          let binary = parseInt(binBlock.substring(i, i + BYTE_SIZE), 2);
           return acc + String.fromCharCode(binary);
         }, '');
   }
 
   const val = this.valueOf();
+  const asciiEndPos = val.length - 2;
   let result = ''; i = 2;
-  for (i = 2; i <= val.length - 2 - ASCII85_BLOCK_SIZE; ) {
+  for (i = 2; i < asciiEndPos; ) {
     if (val[i] === 'z') {
       result += NULL_BLOCK;
       i += 1;
     } else {
+      // stop if it does not have 5 ascii characters
+      if ((i + ASCII85_BLOCK_SIZE - 1) >= asciiEndPos) { break; }
       result += conversion(encodeBinary(val, i));
       i += ASCII85_BLOCK_SIZE;
     }
   }
 
   // last block
-  let numPadChar = val.length - 2 - i;
+  let numPadChar = (ASCII85_BLOCK_SIZE - (asciiEndPos - i)) % ASCII85_BLOCK_SIZE;
   if (numPadChar !== 0) {
-    let binBlock = conversion(val, val.length - BINARY_BLOCK_SIZE + numPadChar, val.length)
-                    + "00000000".repeat(numPadChar);
-    result += encodeAscii(binBlock);
+    let lastAscii85 = val.substring(i, asciiEndPos) + "u".repeat(numPadChar);    
+    console.log({lastAscii85: lastAscii85});
+    result += conversion(encodeBinary(lastAscii85, 0));    
     result = result.substring(0, result.length - numPadChar);
   }
-
-  console.log({result: result});
   return result;
 }
 
-console.log("\u0000".toAscii85() === '<~!!~>');
-console.log("\u0000\u0000".toAscii85() === '<~!!!~>');
-console.log("\u0000\u0000\u0000".toAscii85() === '<~!!!!~>');
-console.log("\u0000\u0000\u0000\u0000".toAscii85() === '<~z~>');
-console.log('co'.toAscii85() === '<~@rD~>');
-console.log('easy'.toAscii85() === '<~ARTY*~>');
-console.log('moderate'.toAscii85() ===  '<~D/WrrEaa\'$~>');
-console.log('somewhat difficult'.toAscii85() === '<~F)Po,GA(E,+Co1uAnbatCif~>');
+// console.log("\u0000".toAscii85() === '<~!!~>');
+// console.log("\u0000\u0000".toAscii85() === '<~!!!~>');
+// console.log("\u0000\u0000\u0000".toAscii85() === '<~!!!!~>');
+// console.log("\u0000\u0000\u0000\u0000".toAscii85() === '<~z~>');
+// console.log('co'.toAscii85() === '<~@rD~>');
+// console.log('easy'.toAscii85() === '<~ARTY*~>');
+// console.log('moderate'.toAscii85() ===  '<~D/WrrEaa\'$~>');
+// console.log('somewhat difficult'.toAscii85() === '<~F)Po,GA(E,+Co1uAnbatCif~>');
 let longString = 'Man is distinguished, not only by his reason, but by this singular passion from other animals, which is a lust of the mind, that by a perseverance of delight in the continued and indefatigable generation of knowledge, exceeds the short vehemence of any carnal pleasure.';
 let longResult = '<~9jqo^BlbD-BleB1DJ+*+F(f,q/0JhKF<GL>Cj@.4Gp$d7F!,L7@<6@)/0JDEF<G%<+EV:2F!,O<DJ+*.@<*K0@<6L(Df-\\0Ec5e;DffZ(EZee.Bl.9pF"AGXBPCsi+DGm>@3BB/F*&OCAfu2/AKYi(DIb:@FD,*)+C]U=@3BN#EcYf8ATD3s@q?d$AftVqCh[NqF<G:8+EV:.+Cf>-FD5W8ARlolDIal(DId<j@<?3r@:F%a+D58\'ATD4$Bl@l3De:,-DJs`8ARoFb/0JMK@qB4^F!,R<AKZ&-DfTqBG%G>uD.RTpAKYo\'+CT/5+Cei#DII?(E,9)oF*2M7/c~>'
-console.log(longString.toAscii85() === longResult);
+// console.log(longString.toAscii85() === longResult);
 
-console.log("<~!!~>".fromAscii85() === "\u0000");
-console.log("<~!!!~>".fromAscii85() === "\u0000\u0000");
-console.log("<~!!!!~>".fromAscii85() === "\u0000\u0000\u0000");
-console.log("<~z~>".fromAscii85() === "\u0000\u0000\u0000\u0000");
-console.log('<~@rD~>'.fromAscii85() === 'co');
+// console.log("<~!!~>".fromAscii85() === "\u0000");
+// console.log("<~!!!~>".fromAscii85() === "\u0000\u0000");
+// console.log("<~!!!!~>".fromAscii85() === "\u0000\u0000\u0000");
+// console.log("<~z~>".fromAscii85() === "\u0000\u0000\u0000\u0000");
+//console.log('<~@rD~>'.fromAscii85() === 'co');
 console.log('<~ARTY*~>'.fromAscii85() === 'easy');
 console.log('<~D/WrrEaa\'$~>'.fromAscii85() === 'moderate');
 console.log('<~F)Po,GA(E,+Co1uAnbatCif~>'.fromAscii85() === 'somewhat difficult');
+console.log(longResult.fromAscii85() === longString);
