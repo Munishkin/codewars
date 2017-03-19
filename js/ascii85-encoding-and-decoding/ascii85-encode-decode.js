@@ -121,8 +121,6 @@ String.prototype.fromAscii85 = function() {
   // if last block does not have length 5, append 'u' to make it 5 characters long
   // then repeat the same step to do the ascii85 conversion
   // return result
-  const NULL_BLOCK = '\u0000\u0000\u0000\u0000';
-
   const encodeBinary = (val, charIdx) => {
     // make 32-bit binary string
     const binary = ASCII85_POW.reduce((acc, p, j) => {
@@ -142,25 +140,32 @@ String.prototype.fromAscii85 = function() {
         }, '');
   }
 
-  const val = this.valueOf();
-  const asciiEndPos = val.length - 2;
-  let result = ''; i = 2;
-  for (i = 2; i < asciiEndPos; ) {
+  const data = this.valueOf().substring(2, this.valueOf().length - 2).split('');
+  const val = data.reduce((acc, c) => {
+    let asciiValue = c.charCodeAt(0);
+    if (asciiValue >= 33 && asciiValue <= 117 || c === 'z') {
+        return acc + c;
+    }
+    return acc;
+  }, '');    
+  
+  let result = '', i;
+  for (i = 0; i < val.length; ) {
     if (val[i] === 'z') {
-      result += NULL_BLOCK;
+      result += '\u0000\u0000\u0000\u0000';
       i += 1;
     } else {
       // stop if it does not have 5 ascii characters
-      if ((i + ASCII85_BLOCK_SIZE - 1) >= asciiEndPos) { break; }
+      if ((i + ASCII85_BLOCK_SIZE - 1) >= val.length) { break; }
       result += conversion(encodeBinary(val, i));
       i += ASCII85_BLOCK_SIZE;
     }
   }
 
   // last block
-  let numPadChar = (ASCII85_BLOCK_SIZE - (asciiEndPos - i)) % ASCII85_BLOCK_SIZE;
+  let numPadChar = (ASCII85_BLOCK_SIZE - (val.length - i)) % ASCII85_BLOCK_SIZE;
   if (numPadChar !== 0) {
-    let lastAscii85 = val.substring(i, asciiEndPos) + "u".repeat(numPadChar);    
+    let lastAscii85 = val.substring(i) + "u".repeat(numPadChar);    
     result += conversion(encodeBinary(lastAscii85, 0));    
     result = result.substring(0, result.length - numPadChar);
   }
@@ -188,3 +193,6 @@ console.log('<~ARTY*~>'.fromAscii85() === 'easy');
 console.log('<~D/WrrEaa\'$~>'.fromAscii85() === 'moderate');
 console.log('<~F)Po,GA(E,+Co1uAnbatCif~>'.fromAscii85() === 'somewhat difficult');
 console.log(longResult.fromAscii85() === longString);
+console.log('<~GA(]4ATMg !@q?d)ATMq~>'.fromAscii85() === 'whitespace test'); 
+console.log('<~GA(]4A\nTMg!@q\n?d)ATM\nr91&~>'.fromAscii85() === 'whitespace test 2' ); 
+console.log('<~GA(]4ATMg!@\tq?d)ATMr91B~>'.fromAscii85() === 'whitespace test 3'); 
