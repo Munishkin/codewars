@@ -31,26 +31,19 @@ getMissingIngredients = (recipe, added) ->
   # if diff > 0, add item:diff in hash
   # if diff <= 0, do nothing
   numCakes = Object.keys(added).reduce ((acc, item) ->
-    #console.log(item)
     ratio = 1
     if recipe[item]
-      #console.log {item: item, diff: recipe[item]}
       ratio = Math.ceil(added[item] / recipe[item])
-    console.log { ratio : ratio }
     return if ratio > acc then ratio else acc
   ), 0
   if numCakes is 0 then numCakes = 1
-  console.log { numCakes: numCakes }
   
   result = Object.keys(recipe).reduce ((acc, item) ->
-    #console.log(item)
-    
     if not added[item]
       #console.log {item: item, diff: recipe[item]}
-      acc[item] = recipe[item]
+      acc[item] = recipe[item] * numCakes
     else
-      diff = recipe[item] - added[item]
-      #console.log {diff: diff}
+      diff = numCakes * recipe[item] - added[item]
       if diff > 0 then acc[item] = diff
     acc
   ), {}
