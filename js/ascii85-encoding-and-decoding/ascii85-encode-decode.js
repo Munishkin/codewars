@@ -128,7 +128,6 @@ String.prototype.fromAscii85 = function() {
     const binary = ASCII85_POW.reduce((acc, p, j) => {
       return acc + ((val.charCodeAt(charIdx+j) - ASCII85_OFFSET) * p);
     }, 0).toString(2);
-//    const binary = base10.toString(2);
     const numZeroFilled = BINARY_BLOCK_SIZE * BYTE_SIZE - binary.length;
     return (numZeroFilled > 0 ? "0".repeat(numZeroFilled) : '') + binary;
   }
@@ -162,7 +161,6 @@ String.prototype.fromAscii85 = function() {
   let numPadChar = (ASCII85_BLOCK_SIZE - (asciiEndPos - i)) % ASCII85_BLOCK_SIZE;
   if (numPadChar !== 0) {
     let lastAscii85 = val.substring(i, asciiEndPos) + "u".repeat(numPadChar);    
-    //console.log({lastAscii85: lastAscii85});
     result += conversion(encodeBinary(lastAscii85, 0));    
     result = result.substring(0, result.length - numPadChar);
   }
