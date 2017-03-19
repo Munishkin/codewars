@@ -20,7 +20,41 @@
 #must not be present in the result.
 
 getMissingIngredients = (recipe, added) ->
-  {}
+  # need to calculate the number of cakes to bake
+  # calculate ceiling of cake that each added ingredient can make
+  # find the max value out of them as the number of cakes to bake
+  #
+  # iterate recipe hash
+  # if item is not in added then, added to item:recipe's amount x no. of cakes
+  # if item is in added, calculate diff = (no. pf cales * amount in recipe -
+  # amount in added)
+  # if diff > 0, add item:diff in hash
+  # if diff <= 0, do nothing
+  numCakes = Object.keys(added).reduce ((acc, item) ->
+    #console.log(item)
+    ratio = 1
+    if recipe[item]
+      #console.log {item: item, diff: recipe[item]}
+      ratio = Math.ceil(added[item] / recipe[item])
+    console.log { ratio : ratio }
+    return if ratio > acc then ratio else acc
+  ), 0
+  if numCakes is 0 then numCakes = 1
+  console.log { numCakes: numCakes }
+  
+  result = Object.keys(recipe).reduce ((acc, item) ->
+    #console.log(item)
+    
+    if not added[item]
+      #console.log {item: item, diff: recipe[item]}
+      acc[item] = recipe[item]
+    else
+      diff = recipe[item] - added[item]
+      #console.log {diff: diff}
+      if diff > 0 then acc[item] = diff
+    acc
+  ), {}
+  result
 
 
 # test cases
@@ -28,12 +62,12 @@ recipe = {flour: 200, eggs: 1, sugar: 100 }
 
  # must return {flour: 150, sugar: 100 }
 a = getMissingIngredients recipe, {flour: 50, eggs: 1}
-console.log {a: a}
+console.log a
 
 # must return {flour: 200, eggs: 1, sugar: 100}
 b = getMissingIngredients recipe, {}
-console.log {b: b}
+console.log b
         
 # must return {flour: 100, eggs: 3, sugar: 100}
 c = getMissingIngredients recipe, {flour: 500, sugar: 200}
-console.log {c: c}
+console.log c
