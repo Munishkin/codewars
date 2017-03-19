@@ -105,9 +105,8 @@ String.prototype.toAscii85 = function() {
 
 String.prototype.fromAscii85 = function() {
 
-  const NULL_BLOCK = '\u0000\u0000\u0000\u0000';
-
   // decode this string from ASCII85
+  // strip <~ at the beginning and ~> at the end
   // if ascii85 character is z then, append \u0000\u0000\u0000\u0000 to result string
   // Otherwise, retrieve the next 5 characters to form an ascii85 block
   // calculate the base 10 value of the ascii85 block
@@ -121,7 +120,52 @@ String.prototype.fromAscii85 = function() {
   // if last block does not have length 5, append 'u' to make it 5 characters long
   // then repeat the same step to do the ascii85 conversion
   // return result
-  return '';
+  const NULL_BLOCK = '\u0000\u0000\u0000\u0000';
+
+  const encodeBinary = (val, i) => {
+    // make 32-bit binary string
+    let base10 = ASCII85_POW.reduce((acc, p, j) => {
+      return acc + (val[i+j] - ASCII85_OFFSET) * p);
+    }, 0);
+    const binary = base10.toString(2);
+    // make 32-bit binary string
+    const numZeroFilled = BINARY_BLOCK_SIZE * BYTE_SIZE - binary.length;
+    return (numZeroFilled > 0 ? "0".repeat(numZeroFilled) : '') + binary;
+  }
+
+  // reutrn 32-bit binary to 4 ascii characters
+  const conversion = (binBlock) => {
+    return Array(BINARY_BLOCK_SIZE).fill()
+        .map((_, i) => { return i * BYTE_SIZE; })  // return 0, 8, 16, 24
+        .reduce((acc, i) => {
+          let binary = binBlock.substring(i, i + BYTE_SIZE).parseInt(2);
+          return acc + String.fromCharCode(binary);
+        }, '');
+  }
+
+  const val = this.valueOf();
+  let result = ''; i = 2;
+  for (i = 2; i <= val.length - 2 - ASCII85_BLOCK_SIZE; ) {
+    if (val[i] === 'z') {
+      result += NULL_BLOCK;
+      i += 1;
+    } else {
+      result += conversion(encodeBinary(val, i));
+      i += ASCII85_BLOCK_SIZE;
+    }
+  }
+
+  // last block
+  let numPadChar = val.length - 2 - i;
+  if (numPadChar !== 0) {
+    let binBlock = conversion(val, val.length - BINARY_BLOCK_SIZE + numPadChar, val.length)
+                    + "00000000".repeat(numPadChar);
+    result += encodeAscii(binBlock);
+    result = result.substring(0, result.length - numPadChar);
+  }
+
+  console.log({result: result});
+  return result;
 }
 
 console.log("\u0000".toAscii85() === '<~!!~>');
