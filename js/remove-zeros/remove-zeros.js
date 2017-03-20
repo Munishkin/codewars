@@ -16,28 +16,33 @@ function removeZeros(array) {
   //  swap both element and record the new position of the zero element
   //  repeat the process with the next element until the end of array is reached
   
+  
   let i = 0;
-  let zeroCount = 0;
   while (i < array.length) {
-    if (array[i] == 0) {
-      zeroCount += 1;
+    let hasSwap = false;
+    if (array[i] === 0 || array[i] === '0') {
       let zeroPos = i;
       let j = zeroPos + 1;
       while (j < array.length) {
-        if (array[j] != 0) {
+        if (array[j] !== 0 && array[j] !== '0') {
           let temp = array[j];
           array[j] = array[zeroPos];
           array[zeroPos] = temp;
           zeroPos = j;
+          hasSwap = true;
         } 
         j += 1;
       }
-      console.log(array);
-    }
-    i++;
+      console.log({i: i, pass : array});
+      if (array[i] !== 0 && array[i] !== '0') { i++; }
+      else if (!hasSwap) { 
+        // no swap takes place. all zeroes are at the back of the array
+        break;
+      }        
+    } else {
+      i += 1;
+    } 
   }
-  
-  
   console.log(array);
   return array;
 }
