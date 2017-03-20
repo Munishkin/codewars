@@ -9,6 +9,32 @@ function removeZeros(array) {
   // to use any Array or Object prototype methods such as .shift(), .push(), etc
   
   // the correctly sorted array should be returned.
+  
+  // for each element, 
+  //  if it is not zero, ignore and go to the next elements
+  //  if it is zero, visit subsequent until a non-zero eleement is found
+  //  swap both element and record the new position of the zero element
+  //  repeat the process with the next element until the end of array is reached
+  
+  let i = 0;
+  while (i < array.length) {
+    if (array[i] == 0) {
+      let zeroPos = i;
+      let j = zeroPos + 1;
+      while (j < array.length) {
+        if (array[j] != 0) {
+          let temp = array[j];
+          array[j] = array[zeroPos];
+          array[zeroPos] = temp;
+          zeroPos = j;
+        }
+        j += 1;
+      }
+      console.log(array);
+    }
+    i++;
+  }
+  console.log(array);
   return array;
 }
 
