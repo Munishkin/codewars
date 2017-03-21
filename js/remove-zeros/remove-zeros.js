@@ -32,7 +32,7 @@ function removeZeros(array) {
       zeroCount += 1;
     }
   }
-  while (i >= 0) {    
+  while (i >= 0 && zeroCount > 0) {    
     if (array[i] === 0 || array[i] === '0') {
       const temp = array[i];  
       let hasSwap = false;  
@@ -44,13 +44,7 @@ function removeZeros(array) {
       lastZeroPos--;
       zeroCount--;
       
-      if (zeroCount === 0) { 
-        // all zeros are moved to the end of the array
-        break;
-      }
       // find the next zero
-      //if (array[i] !== 0 && array[i] !== '0') { i--; }
-      // this zero is already at the end, find the next one
       if (!hasSwap || (array[i] !== 0 || array[i] !== '0')) { i--; }
     } else {
       i--;
