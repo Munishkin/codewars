@@ -24,7 +24,6 @@ function removeZeros(array) {
   //	Repeat the process for array[i] again
   // terminates when i < 0 or number of zeros to move is 0
   
-  let i = array.length - 1;
   let lastZeroPos = array.length;
   let zeroCount = 0;  
   for (let j = 0; j < array.length; j++) {
@@ -32,7 +31,7 @@ function removeZeros(array) {
       zeroCount += 1;
     }
   }
-  while (i >= 0 && zeroCount > 0) {    
+  for (let i = array.length - 1; i >= 0 && zeroCount > 0; i--) {    
     if (array[i] === 0 || array[i] === '0') {
       const temp = array[i];  
       let hasSwap = false;  
@@ -45,14 +44,11 @@ function removeZeros(array) {
       zeroCount--;
       
       // find the next zero
-      if (!hasSwap || (array[i] !== 0 || array[i] !== '0')) { i--; }
-    } else {
-      i--;
-    } 
+      if (hasSwap && (array[i] === 0 || array[i] === '0')) { i++; }
+    }
   }
   return array;
 }
-
 
 var input = [7, 2, 3, 0, 4, 6, 0, 0, 13, 0, 78, 0, 0, 19, 14],
     solution = [7, 2, 3, 4, 6, 13, 78, 19, 14, 0, 0, 0, 0, 0, 0];
