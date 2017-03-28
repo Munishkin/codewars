@@ -53,25 +53,13 @@ function processImage(imageData, height, width, weights){
   };
 
   const [centerX, centerY] = [ (weights.length - 1) / 2, (weights.length - 1) / 2 ];    
-  const calculateWeightedRGB = (imageX, imageY) => {
-      // calculate the translation  
-      /*for (let i = 0; i < weights.length; i++) {
-          for (let j = 0; j < weights.length; j++) {
-            let distX = i - centerX;
-            let distY = j - centerY;
-            let [neighborX, neighborY] = [ imageX - distX, imageY - distY ];
-            if (neighborX >= 0 && neighborX < width - 1 && neighborY >= 0 && neighborY < height - 1) {
-              neighbors.push([neighborX, neighborY]);
-            }
-          }
-      }*/
-      
+  const calculateWeightedRGB = (imageY, imageX) => {      
       return weights.reduce((sumWeight, row, rowIdx) => {
           let rowWeightedRGB = row.reduce((rowWeight, weight, colIdx) => {
                 const distX = colIdx - centerX;
                 const distY = rowIdx - centerY;
-                const [x, y] = [ imageX - distX, imageY - distY ];
-                let imageRGB = getImageRGB(x, y);
+                const [y, x] = [ imageY - distY, imageX - distX ];
+                let imageRGB = getImageRGB(y, x);
                 if (!imageRGB) {
                   rowWeight.r += weight * imageRGB.r;
                   rowWeight.g += weight * imageRGB.g; 
