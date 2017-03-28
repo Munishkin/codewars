@@ -61,7 +61,7 @@ function processImage(imageData, height, width, weights){
           let rowWeightedRGB = row.reduce((rowWeight, weight, colIdx) => {
                 const distX = colIdx - centerX;
                 const distY = rowIdx - centerY;
-                let [y, x] = [ imageY - distY, imageX - distX ];
+                let [y, x] = [ imageY + distY, imageX + distX ];
                 
                 // image data is not found. need to extend the edge so that matrix
                 // covers neighbors of pixel
@@ -89,10 +89,16 @@ function processImage(imageData, height, width, weights){
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
         let weightedRGB = calculateWeightedRGB(y, x);
-        results.push(Math.round(weightedRGB.r));
-        results.push(Math.round(weightedRGB.g));
-        results.push(Math.round(weightedRGB.b));
-    }
+        let normalizedRGB = [Math.round(weightedRGB.r), Math.round(weightedRGB.g), Math.round(weightedRGB.b)]
+        if (normalizedRGB[0] < 0) { normalizedRGB[0] = 0; }
+        else if (normalizedRGB[0] > 255) { normalizedRGB[0] = 255; }
+        if (normalizedRGB[1] < 0) { normalizedRGB[1] = 0; }
+        else if (normalizedRGB[1] < 0) { normalizedRGB[1] = 255; }
+        if (normalizedRGB[2] < 0) { normalizedRGB[2] = 0; }
+        else if (normalizedRGB[2] < 0) { normalizedRGB[2] = 255; }
+        
+        results = results.concat(normalizedRGB);
+      }
   }
   return results;
 }
