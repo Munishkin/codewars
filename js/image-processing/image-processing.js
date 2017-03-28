@@ -73,7 +73,7 @@ function processImage(imageData, height, width, weights){
                 let imageRGB = getImageRGB(y, x);
                 if (imageRGB != null) {
                   rowWeight.r += weight * imageRGB.r;
-                  rowWeight.g += weight * imageRGB.g; rowWeightedRGB
+                  rowWeight.g += weight * imageRGB.g; 
                   rowWeight.b += weight * imageRGB.b;
                 } 
                 return rowWeight;  
