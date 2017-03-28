@@ -25,7 +25,10 @@ of the pixel itself. The array is by row and then column. I.e. weights[y][x]
 
 Return
 
-An array of the image data adjusted by the weighted average per pixel's neighborhood. Where the weights matrix specifies pixels outside the actual image, use the values of the closest pixel. (E.g. extend the edges as far as necessary to provide values for the matrix.) Each value should be in the range 0-255.
+An array of the image data adjusted by the weighted average per pixel's neighborhood. 
+Where the weights matrix specifies pixels outside the actual image, use the values of 
+the closest pixel. (E.g. extend the edges as far as necessary to provide values 
+for the matrix.) Each value should be in the range 0-255.
 
 */
 function processImage(imageData, height, width, weights){
@@ -48,7 +51,8 @@ function processImage(imageData, height, width, weights){
     } 
     return null;
   };
-     
+
+  const [centerX, centerY] = [ (weights.length - 1) / 2, (weights.length - 1) / 2 ];    
   const calculateWeightedRGB = (imageX, imageY) => {
       // calculate the translation  
       /*for (let i = 0; i < weights.length; i++) {
@@ -62,30 +66,34 @@ function processImage(imageData, height, width, weights){
           }
       }*/
       
-      const [centerX, centerY] = [ (weights.length - 1) / 2, (weights.length - 1) / 2 ]; 
-      return weights.reduce((acc, row, rowIdx) => {
-          let rowWeightedRGB = row.reduce((sumWeight, weight, colIdx) => {
-                let distX = colIdx - centerX;
-                let distY = rowIdx - centerY;
-                let [x, y] = [ imageX - distX, imageY - distY ];
-                if (x >= 0 && x < width - 1 && y >= 0 && y < height - 1) {
-                  let imageRGB = getImageRGB(x, y);
-                  
-                  sumWeight.r += weight * 
-                  sumWeight.g += weight * 
-                  sumWeight.b += weight * 
+      return weights.reduce((sumWeight, row, rowIdx) => {
+          let rowWeightedRGB = row.reduce((rowWeight, weight, colIdx) => {
+                const distX = colIdx - centerX;
+                const distY = rowIdx - centerY;
+                const [x, y] = [ imageX - distX, imageY - distY ];
+                let imageRGB = getImageRGB(x, y);
+                if (!imageRGB) {
+                  rowWeight.r += weight * imageRGB.r;
+                  rowWeight.g += weight * imageRGB.g; 
+                  rowWeight.b += weight * imageRGB.b;
                 }
-                return sumWeight;  
+                return rowWeight;  
             }, { r: 0, g: 0, b: 0 });
-            acc.r += rowWeightedRGB.r;
-            acc.g += rowWeightedRGB.g;
-            acc.b += rowWeightedRGB.b;
-            return acc;            
+            sumWeight.r += rowWeightedRGB.r;
+            sumWeight.g += rowWeightedRGB.g;
+            sumWeight.b += rowWeightedRGB.b;
+            return sumWeight;            
       }, { r: 0, g: 0, b: 0 });
   }
-  
-  
-  let results = [];
-  
+
+ let results = []; 
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+        let weightedRGB = calculateWeightedRGB(y, x);
+        results.push(weightedRGB.r);
+        results.push(weightedRGB.g);
+        results.push(weightedRGB.b);
+    }
+  }
   return results;
 }
