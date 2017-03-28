@@ -44,8 +44,8 @@ function processImage(imageData, height, width, weights){
   // return the result array
 
   const NUM_COMPONENTS = 3;
-  const getImageRGB = (x, y) => {
-    const idx = NUM_COMPONENTS * (x * width + y);
+  const getImageRGB = (y, x) => {
+    const idx = NUM_COMPONENTS * (y * width + x);
     if (idx >= 0 && idx < imageData.length - 1) {
       return { r: imageData[idx], g: imageData[idx+1], b: imageData[idx+2] };
     } 
