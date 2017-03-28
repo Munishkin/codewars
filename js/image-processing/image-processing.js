@@ -60,7 +60,7 @@ function processImage(imageData, height, width, weights){
                 const distY = rowIdx - centerY;
                 const [y, x] = [ imageY - distY, imageX - distX ];
                 let imageRGB = getImageRGB(y, x);
-                if (!imageRGB) {
+                if (imageRGB != null) {
                   rowWeight.r += weight * imageRGB.r;
                   rowWeight.g += weight * imageRGB.g; 
                   rowWeight.b += weight * imageRGB.b;
