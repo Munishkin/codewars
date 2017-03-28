@@ -57,6 +57,18 @@ function processImage(imageData, height, width, weights){
 
   const [centerX, centerY] = [ (weights.length - 1) / 2, (weights.length - 1) / 2 ];    
   const calculateWeightedRGB = (imageY, imageX) => {      
+
+      /*for(var c = 0; c < 3; ++c){
+        var sum = 0;
+        for(var i = -n; i <= n; ++i){
+           for(var j = -n; j <= n; ++j){
+            var yy = Math.max(Math.min(y+i, height-1), 0);
+            var xx = Math.max(Math.min(x+j, width-1), 0);
+            sum += weights[i+n][j+n]*imageData[yy*width*3+xx*3+c];
+          }
+        }*/
+
+
       return weights.reduce((sumWeight, row, rowIdx) => {
           let rowWeightedRGB = row.reduce((rowWeight, weight, colIdx) => {
                 const distX = colIdx - centerX;
@@ -65,11 +77,8 @@ function processImage(imageData, height, width, weights){
                 
                 // image data is not found. need to extend the edge so that matrix
                 // covers neighbors of pixel
-                if (y < 0) { y = 0; } 
-                else if (y >= height) { y = height - 1; } 
-                if (x < 0) { x = 0; } 
-                else if (x >= width) { x = width - 1; }
-                
+                y = Math.max(Math.min(y, height - 1), 0);
+                x = Math.max(Math.min(x, weight - 1), 0);                
                 let imageRGB = getImageRGB(y, x);
                 if (imageRGB != null) {
                   rowWeight.r += weight * imageRGB.r;
