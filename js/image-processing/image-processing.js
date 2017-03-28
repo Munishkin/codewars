@@ -33,7 +33,6 @@ for the matrix.) Each value should be in the range 0-255.
 */
 // http://setosa.io/ev/image-kernels/
 
-
   // map the one-dimensional array to a new 2-d (x, y) array
   // For example, height = 3, width = 3
   // [0,0] = 0, [0,1] = 3,.... , [1,0] = 9 (1 * 3 * width + 0 * 3), [1,1] = 12, [1,2] = 15 (1 * 3 * width) + 2 * 3
@@ -56,24 +55,21 @@ function processImage(imageData, height, width, weights){
     return null;
   };
 
-  const [centerX, centerY] = [ (weights.length - 1) / 2, (weights.length - 1) / 2 ];    
+  const center = (weights.length - 1) / 2;
   const calculateWeightedRGB = (imageY, imageX) => {      
       return weights.reduce((sumWeight, row, rowIdx) => {
           let rowWeightedRGB = row.reduce((rowWeight, weight, colIdx) => {
-                const distX = colIdx - centerX;
-                const distY = rowIdx - centerY;
-                let [y, x] = [ imageY + distY, imageX + distX ];
+                const distX = colIdx - center;
+                const distY = rowIdx - center;
                 
                 // image data is not found. need to extend the edge so that matrix
                 // covers neighbors of pixel
-                y = Math.min(Math.max(y, 0), height - 1);
-                x = Math.min(Math.max(x, 0), weight - 1);                
+                y = Math.min(Math.max(imageY + distY, 0), height - 1);
+                x = Math.min(Math.max(imageX + distX, 0), width - 1);                
                 let imageRGB = getImageRGB(y, x);
-                if (imageRGB != null) {
-                  rowWeight.r += weight * imageRGB.r;
-                  rowWeight.g += weight * imageRGB.g; 
-                  rowWeight.b += weight * imageRGB.b;
-                } 
+                rowWeight.r += weight * imageRGB.r;
+                rowWeight.g += weight * imageRGB.g; 
+                rowWeight.b += weight * imageRGB.b; 
                 return rowWeight;  
             }, { r: 0, g: 0, b: 0 });
             sumWeight.r += rowWeightedRGB.r;
@@ -84,35 +80,14 @@ function processImage(imageData, height, width, weights){
   }
 
  let results = []; 
-  for (let y = 0; y < height; y++) {
+ for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
         let weightedRGB = calculateWeightedRGB(y, x);
-        let r = Math.max(Math.min(Math.round(weightedRGB.r), 255));
-        let g = Math.max(Math.min(Math.round(weightedRGB.g), 255));
-        let b = Math.max(Math.min(Math.round(weightedRGB.b), 255));        
+        let r = Math.max(Math.min(Math.round(weightedRGB.r), 255), 0);
+        let g = Math.max(Math.min(Math.round(weightedRGB.g), 255), 0);
+        let b = Math.max(Math.min(Math.round(weightedRGB.b), 255), 0);        
         results = results.concat([r,g,b]);
       }
   }
   return results;
 }
-
-/*function processImage(imageData, height, width, weights){
-  var n = Math.floor(weights.length/2);
-  var out = [];
-  for(var y = 0; y < height; ++y){
-    for(var x = 0 ; x < width; ++x){
-      for(var c = 0; c < 3; ++c){
-        var sum = 0;
-        for(var i = -n; i <= n; ++i){
-           for(var j = -n; j <= n; ++j){
-            var yy = Math.max(Math.min(y+i, height-1), 0);
-            var xx = Math.max(Math.min(x+j, width-1), 0);
-            sum += weights[i+n][j+n]*imageData[yy*width*3+xx*3+c];
-          }
-        }
-        out.push(Math.max(Math.min(Math.round(sum), 255), 0));
-      }
-    }
-  }
-  return out;          
-}*/
