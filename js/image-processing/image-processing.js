@@ -32,7 +32,7 @@ for the matrix.) Each value should be in the range 0-255.
 
 */
 // http://setosa.io/ev/image-kernels/
-function processImage(imageData, height, width, weights){
+
 
   // map the one-dimensional array to a new 2-d (x, y) array
   // For example, height = 3, width = 3
@@ -45,6 +45,7 @@ function processImage(imageData, height, width, weights){
   // if pixel cannot 
   // append to the result array
   // return the result array
+function processImage(imageData, height, width, weights){
 
   const NUM_COMPONENTS = 3;
   const getImageRGB = (y, x) => {
@@ -65,8 +66,8 @@ function processImage(imageData, height, width, weights){
                 
                 // image data is not found. need to extend the edge so that matrix
                 // covers neighbors of pixel
-                y = Math.max(Math.min(y, height - 1), 0);
-                x = Math.max(Math.min(x, weight - 1), 0);                
+                y = Math.min(Math.max(y, 0), height - 1);
+                x = Math.min(Math.max(x, 0), weight - 1);                
                 let imageRGB = getImageRGB(y, x);
                 if (imageRGB != null) {
                   rowWeight.r += weight * imageRGB.r;
