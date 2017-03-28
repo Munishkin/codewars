@@ -81,7 +81,7 @@ function processImage(imageData, height, width, weights){
             sumWeight.r += rowWeightedRGB.r;
             sumWeight.g += rowWeightedRGB.g;
             sumWeight.b += rowWeightedRGB.b;
-            return { Math.round(sumWeight.r), Math.round(sumWeight.g), Math.round(sumWeight.b) };            
+            return sumWeight;
       }, { r: 0, g: 0, b: 0 });
   }
 
@@ -89,9 +89,9 @@ function processImage(imageData, height, width, weights){
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
         let weightedRGB = calculateWeightedRGB(y, x);
-        results.push(weightedRGB.r);
-        results.push(weightedRGB.g);
-        results.push(weightedRGB.b);
+        results.push(Math.round(weightedRGB.r));
+        results.push(Math.round(weightedRGB.g));
+        results.push(Math.round(weightedRGB.b));
     }
   }
   return results;
