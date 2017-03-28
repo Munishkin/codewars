@@ -64,28 +64,26 @@ function processImage(imageData, height, width, weights){
                 
                 // image data is not found. need to extend the edge so that matrix
                 // covers neighbors of pixel
-                y = Math.min(Math.max(imageY + distY, 0), height - 1);
-                x = Math.min(Math.max(imageX + distX, 0), width - 1);                
-                let imageRGB = getImageRGB(y, x);
-                rowWeight.r += weight * imageRGB.r;
-                rowWeight.g += weight * imageRGB.g; 
-                rowWeight.b += weight * imageRGB.b; 
-                return rowWeight;  
-            }, { r: 0, g: 0, b: 0 });
-            sumWeight.r += rowWeightedRGB.r;
-            sumWeight.g += rowWeightedRGB.g;
-            sumWeight.b += rowWeightedRGB.b;
-            return sumWeight;
-      }, { r: 0, g: 0, b: 0 });
+                const y = Math.min(Math.max(imageY + distY, 0), height - 1);
+                const x = Math.min(Math.max(imageX + distX, 0), width - 1);                
+                const imageRGB = getImageRGB(y, x);
+                return [rowWeight[0] + weight * imageRGB.r,
+                        rowWeight[1] + weight * imageRGB.g,
+                        rowWeight[2] + weight * imageRGB.b];
+            }, [0, 0, 0]);
+            return [sumWeight[0] + rowWeightedRGB[0], 
+                    sumWeight[1] + rowWeightedRGB[1], 
+                    sumWeight[2] + rowWeightedRGB[2]];
+      }, [0, 0, 0]);
   }
 
  let results = []; 
  for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
         let weightedRGB = calculateWeightedRGB(y, x);
-        let r = Math.max(Math.min(Math.round(weightedRGB.r), 255), 0);
-        let g = Math.max(Math.min(Math.round(weightedRGB.g), 255), 0);
-        let b = Math.max(Math.min(Math.round(weightedRGB.b), 255), 0);        
+        let r = Math.max(Math.min(Math.round(weightedRGB[0]), 255), 0);
+        let g = Math.max(Math.min(Math.round(weightedRGB[1]), 255), 0);
+        let b = Math.max(Math.min(Math.round(weightedRGB[2]), 255), 0);        
         results = results.concat([r,g,b]);
       }
   }
