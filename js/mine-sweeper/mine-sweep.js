@@ -16,13 +16,13 @@ function solveMine(mineMap,n){
   // to true
   //
   // Information based on the website
-  // We can quickly identify some of the mines. When the number 1 has exactly
-  // one empty square around it, then we know there’s a mine there.
-  // Mark the cell on the board with x and set cell[x,y].mine to true\
-  //
   // Now the next strategy: if a 1 has a mine around it, then we know that all
   // the other squares around the 1 cannot be mines.
   // So open on the squares that we know are not mines:
+  //
+  // We can quickly identify some of the mines. When the number 1 has exactly
+  // one empty square around it, then we know there’s a mine there.
+  // Mark the cell on the board with x and set cell[x,y].mine to true\
   //
   // if number of empty cells around A = the value of cell (A) - number of marked bombs around (A)
   //  - mark all the empty cells as bombs
@@ -30,7 +30,7 @@ function solveMine(mineMap,n){
   // if the value on cell (A) - number of marked bombs around (A) = 0
   //  - the cells around A cannot be bomb and they are safe to open
   //
-  // - If monkey reasoning is not performed in any cell, do matrix algebra
+  // - If monkey reasoning is not performed on any cell, do matrix algebra
   // Do algebra
   //
   // if number of bombs found is the same as n, return result
