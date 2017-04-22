@@ -30,8 +30,8 @@ function solveMine(mineMap,n){
   // if the value on cell (A) - number of marked bombs around (A) = 0
   //  - the cells around A cannot be bomb and they are safe to open
   //
-  // If above reasoning is not performed on any cell, do matrix algebra
-  //  - empty multi-square algorithm
+  // If above reasoning can not on a cell
+  //  - employs multi-square algorithm
   //
   // if number of bombs found is the same as n, open all empty cell and then return result
   // if location of bomb cannot be determined, also returns the result.
