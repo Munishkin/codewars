@@ -30,10 +30,10 @@ function solveMine(mineMap,n){
   // if the value on cell (A) - number of marked bombs around (A) = 0
   //  - the cells around A cannot be bomb and they are safe to open
   //
-  // - If monkey reasoning is not performed on any cell, do matrix algebra
-  // Do algebra
+  // If above reasoning is not performed on any cell, do matrix algebra
+  //  - empty multi-square algorithm
   //
-  // if number of bombs found is the same as n, return result
+  // if number of bombs found is the same as n, open all empty cell and then return result
   // if location of bomb cannot be determined, also returns the result.
 
   const rows = mineMap.split('\n');
@@ -67,6 +67,54 @@ let a = `? ? ? ? ? ?
 0 0 0 ? ? ?`
 
 solveMine(a, 6)
+
+/*
+1 x 1 1 x 1
+2 2 2 1 2 2
+2 x 2 0 1 x
+2 x 2 1 2 2
+1 1 1 1 x 1
+0 0 0 1 1 1
+*/
+
+A + B                 = 1   => A = 0
+A + B + C             = 1   => C = 0
+    B + C + D         = 1   => B = 1
+        C + D + E     = 1   => E = 1
+            D + E + F = 1   => F = 0
+                E + F = 1   => D = 0
+
+
+
+A B C D E F
+1 x 1 1 x 1
+2 2 2 1 2 2
+2 x 2 0 1 x
+2 x 2 1 2 2
+1 1 1 1 x 1
+0 0 0 1 1 1
+
+/*
+1 x x 1 0 0 0
+2 3 3 1 0 1 1
+1 x 1 0 0 1 x
+1 1 1 0 0 1 1
+0 1 1 1 0 0 0
+0 1 x 1 0 0 0
+0 1 1 1 0 1 1
+0 0 0 0 0 1 x
+0 0 0 0 0 1 1
+*/
+
+1 x x 1 0 0 0
+2 3 3 1 0 1 1
+1 x 1 0 0 1 x
+1 1 1 0 0 1 1
+0 1 1 1 0 0 0
+0 1 x 1 0 0 0
+0 1 1 1 0 1 1
+0 0 0 0 0 1 x
+0 0 0 0 0 1 1
 
 /*
 
