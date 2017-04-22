@@ -130,7 +130,7 @@ function SQLEngine(database){
     let primaryTableName = strQuery.substring(idxFrom + 4, idxNextKeyword).trim();
 
     let results = this.getTableData(primaryTableName);
-    results = this.filterResult(results, strQuery, idxWhere);``
+    results = this.filterResult(results, strQuery, idxWhere);
     results = this.projection(results, strQuery, idxFrom);
 
     return results;
