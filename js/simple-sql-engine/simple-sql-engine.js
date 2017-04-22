@@ -17,20 +17,17 @@ function SQLEngine(database){
 
   this.database = database;
 
-  this.getResultSet = (tableName, selectFields) => {
-      let table = this.database[tableName]
-      let tableFields = selectFields.filter((f) => {
-            return f.table === tableName;
-        });
+  this.getTableData = (tableName) => {
+      let table = this.database[tableName];
 
-      return table.reduce((acc, row) => {
-            let subData = tableFields.reduce((rowMap, f) => {
-                    rowMap[f.table + '.' + f.column] = row[f.column];
-                    return rowMap;
-                }, {});
-            acc.push(subData);
-            return acc;
-        }, []);
+      return table.map((rowObj) => {
+            let mapData = Object.keys(rowObj).reduce((rowMap, k) => {
+                //let [k, v] = entry;
+                rowMap[tableName + '.' + k] = rowObj[k];
+                return rowMap;
+            }, {});
+            return mapData;
+        });
   };
 
   this.filterResult = (results, strQuery, idxWhere) => {
@@ -88,6 +85,19 @@ function SQLEngine(database){
     return results;
   }
 
+  this.projection = (results, strQuery, idxFrom) => {
+
+      let projectedFields = strQuery.substring(6, idxFrom).trim()
+                  .replace(/\s/g, '').split(',');
+
+      return results.map((rowObj) => {
+            return projectedFields.reduce((rowMap, f) => {
+                    rowMap[f] = rowObj[f];
+                    return rowMap;
+                }, {});
+        });
+  };
+
   this.execute = (query) => {
 
     // 1) Find fields to query
@@ -103,6 +113,7 @@ function SQLEngine(database){
     //      if it is constant, a number or a quoted string
     //  5) Perform FROM-JOIN to form the result select
     //  6) Filter result set by where clause
+    //  7) Do projection
 
     let strQuery = query.trim();
     console.log (strQuery);
@@ -117,19 +128,11 @@ function SQLEngine(database){
     let idxNextKeyword = idxJoin >= 0 ? idxJoin : (idxWhere > 0 ? idxWhere : query.length);
 
     let primaryTableName = strQuery.substring(idxFrom + 4, idxNextKeyword).trim();
-    let selectFields = strQuery.substring(6, idxFrom).trim()
-                  .replace(/\s/g, '')
-                  .split(',')
-                  .map((field) => {
-                      let [table, column] = field.split('.');
-                      return {
-                          table: table,
-                          column: column
-                      };
-                  });
 
-    let results = this.getResultSet(primaryTableName, selectFields);
+    let results = this.getTableData(primaryTableName);
     results = this.filterResult(results, strQuery, idxWhere);``
+    results = this.projection(results, strQuery, idxFrom);
+
     return results;
   }
 }
@@ -174,8 +177,12 @@ console.log(actual2);
 let actual3 = engine.execute('SELECT movie.name, movie.directorID FROM movie WHERE movie.directorID >= 2');
 console.log(actual3);
 
-let actual3a = engine.execute('SELECT movie.name FROM movie WHERE movie.name = \'Titanic\'');
+let actual3a = engine.execute('SELECT movie.name, movie.id FROM movie WHERE movie.name = \'Titanic\'');
 console.log(actual3a);
+
+// let actual4 = engine.execute('SELECT movie.name, director.name '
+//                            +'FROM movie '
+//                            +'JOIN director ON director.id = movie.directorID');
 
 
 //
