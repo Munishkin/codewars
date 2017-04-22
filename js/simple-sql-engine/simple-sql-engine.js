@@ -13,8 +13,82 @@ An optional WHERE clause with only one condition.
 */
 function SQLEngine(database){
 
+  const operators = ['<=', '>=', '<>', '=', '<', '>'];
+
   this.database = database;
-  this.execute = function(query){
+
+  this.getResultSet = (tableName, selectFields) => {
+      let table = this.database[tableName]
+      let tableFields = selectFields.filter((f) => {
+            return f.table === tableName;
+        });
+
+      return table.reduce((acc, row) => {
+            let subData = tableFields.reduce((rowMap, f) => {
+                    rowMap[f.table + '.' + f.column] = row[f.column];
+                    return rowMap;
+                }, {});
+            acc.push(subData);
+            return acc;
+        }, []);
+  };
+
+  this.filterResult = (results, strQuery, idxWhere) => {
+
+    if (idxWhere >= 0) {
+      let condition = strQuery.substring(idxWhere + 5).trim()
+                      .replace(/\s/g, '');
+      let op = operators.find((op) => { return condition.indexOf(op) >= 0; });
+      let idxOp = condition.indexOf(op);
+
+      let leftCondField = condition.substring(0, idxOp);
+      let rightCondField = condition.substring(idxOp + op.length);
+      let isLeftFieldColumn = leftCondField.indexOf('.') >= 0;
+
+      let [condColumn, condField] = isLeftFieldColumn ?
+        [ leftCondField, rightCondField] : [ rightCondField, leftCondField];
+
+      let constValue = null;
+      // single quote string
+      if (condField.indexOf('\'') >= 0) {
+        constValue = condField.replace(/\'/g, '');
+      } else {
+        constValue = Number(condField);
+      }
+
+      return results.reduce((acc, record) => {
+        if (op === '=') {
+          if (record[condColumn] === constValue) {
+            acc.push(record);
+          }
+        } else if (op === '<=') {
+          if (record[condColumn] <= constValue) {
+            acc.push(record);
+          }
+        } else if (op === '>=') {
+          if (record[condColumn] >= constValue) {
+            acc.push(record);
+          }
+        } else if (op === '<') {
+          if (record[condColumn] < constValue) {
+            acc.push(record);
+          }
+        } else if (op === '>') {
+          if (record[condColumn] > constValue) {
+            acc.push(record);
+          }
+        } else if (op === '<>') {
+          if (record[condColumn] !== constValue) {
+            acc.push(record);
+          }
+        }
+        return acc;
+      }, []);
+    }
+    return results;
+  }
+
+  this.execute = (query) => {
 
     // 1) Find fields to query
     //    - search select and from and find the field names in between
@@ -43,7 +117,7 @@ function SQLEngine(database){
     let idxNextKeyword = idxJoin >= 0 ? idxJoin : (idxWhere > 0 ? idxWhere : query.length);
 
     let primaryTableName = strQuery.substring(idxFrom + 4, idxNextKeyword).trim();
-    let fields = strQuery.substring(6, idxFrom).trim()
+    let selectFields = strQuery.substring(6, idxFrom).trim()
                   .replace(/\s/g, '')
                   .split(',')
                   .map((field) => {
@@ -53,32 +127,9 @@ function SQLEngine(database){
                           column: column
                       };
                   });
-                  
-    let getResultSet = (tableName, selectFields) => {
-      let table = this.database[tableName]
-      let tableFields = selectFields.filter((f) => {
-            return f.table === tableName;
-        });
 
-      return table.reduce((acc, row) => {
-            let subData = tableFields.reduce((rowMap, f) => {
-                    rowMap[f.table + '.' + f.column] = row[f.column];
-                    return rowMap;
-                }, {});
-            acc.push(subData);
-            return acc;
-        }, []);
-    };
-
-    let results = getResultSet(primaryTableName, fields);
-
-    // console.log(strQuery.search(reJoin));
-    // console.log(strQuery.search(reWhere));
-    // console.log(results);
-
-    //if ()
-
-    //let results = [];
+    let results = this.getResultSet(primaryTableName, selectFields);
+    results = this.filterResult(results, strQuery, idxWhere);``
     return results;
   }
 }
@@ -120,8 +171,13 @@ console.log(actual);
 let actual2 = engine.execute('SELECT movie.name, movie.directorID FROM movie');
 console.log(actual2);
 
-let actual3 = engine.execute('SELECT movie.name FROM movie WHERE movie.directorID = 1');
+let actual3 = engine.execute('SELECT movie.name, movie.directorID FROM movie WHERE movie.directorID >= 2');
 console.log(actual3);
+
+let actual3a = engine.execute('SELECT movie.name FROM movie WHERE movie.name = \'Titanic\'');
+console.log(actual3a);
+
+
 //
 // let actual3 = engine.execute('SELECT movie.name, director.name '
 //                            +'FROM movie '
