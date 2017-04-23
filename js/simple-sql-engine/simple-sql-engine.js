@@ -10,10 +10,19 @@ A FROM clause, which identifies the primary table to select records from,
 Any number of optional JOIN clauses which join another table to the table
 identified by the FROM clause, all of which will be treated as INNER JOINs.
 An optional WHERE clause with only one condition.
+
+ All table and column names will be simple strings with no spaces. Constant
+ strings will be written in normal SQL format, with single quotes and escaping
+ internal single quotes by doubling them (for example, 'a ''string''
+ containing quotes').
 */
 function SQLEngine(database){
 
-  const operators = ['<=', '>=', '<>', '=', '<', '>'];
+  const OPERATORS = ['<=', '>=', '<>', '=', '<', '>'];
+  const reFrom =  /FROM/i;
+  const reJoin =  /JOIN/i;
+  const reWhere = /WHERE/i;
+  const reON = /ON/i;
 
   this.database = database;
 
@@ -30,54 +39,60 @@ function SQLEngine(database){
         });
   };
 
+  this.parseCondition = (condition) => {
+    let op = OPERATORS.find((op) => { return condition.indexOf(op) >= 0; });
+    let idxOp = condition.indexOf(op);
+
+    let leftCondField = condition.substring(0, idxOp).trim();
+    let rightCondField = condition.substring(idxOp + op.length).trim();
+    let isLeftFieldColumn = leftCondField.indexOf('.') >= 0;
+
+    let [condColumn, condField] = isLeftFieldColumn ?
+      [ leftCondField, rightCondField] : [ rightCondField, leftCondField];
+
+    let constValue = condField;
+    // single quote string
+    if (condField.indexOf('\'') >= 0) {
+      constValue = condField.substring(1, condField.length - 1);
+      // replace internal double single quote with single quote
+      if (constValue.indexOf('\'\'') >= 0) {
+        constValue = constValue.replace('\'\'', '\'');
+      }
+    } else if (!isNaN(condField)) {
+      constValue = Number(condField);
+    }
+
+    let f = null;
+    if (op === '=') {
+      f = (x, y) => { return x === y; };
+    } else if (op === '<=') {
+      f = (x, y) => { return x <= y; };
+    } else if (op === '>=') {
+      f = (x, y) => { return x >= y; };
+    } else if (op === '<') {
+      f = (x, y) => { return x < y; };
+    } else if (op === '>') {
+      f = (x, y) => { return x > y; };
+    } else if (op === '<>') {
+      f = (x, y) => { return x !== y; };
+    }
+
+    return {
+      condColumn: condColumn,
+      constValue: constValue,
+      func: f
+    };
+  }
+
   this.filterResult = (results, strQuery, idxWhere) => {
 
     if (idxWhere >= 0) {
-      let condition = strQuery.substring(idxWhere + 5).trim()
-                      .replace(/\s/g, '');
-      let op = operators.find((op) => { return condition.indexOf(op) >= 0; });
-      let idxOp = condition.indexOf(op);
-
-      let leftCondField = condition.substring(0, idxOp);
-      let rightCondField = condition.substring(idxOp + op.length);
-      let isLeftFieldColumn = leftCondField.indexOf('.') >= 0;
-
-      let [condColumn, condField] = isLeftFieldColumn ?
-        [ leftCondField, rightCondField] : [ rightCondField, leftCondField];
-
-      let constValue = null;
-      // single quote string
-      if (condField.indexOf('\'') >= 0) {
-        constValue = condField.replace(/\'/g, '');
-      } else {
-        constValue = Number(condField);
-      }
+      let condition = strQuery.substring(idxWhere + 5).trim();
+      let { condColumn, constValue, func } = this.parseCondition(condition);
 
       return results.reduce((acc, record) => {
-        if (op === '=') {
-          if (record[condColumn] === constValue) {
-            acc.push(record);
-          }
-        } else if (op === '<=') {
-          if (record[condColumn] <= constValue) {
-            acc.push(record);
-          }
-        } else if (op === '>=') {
-          if (record[condColumn] >= constValue) {
-            acc.push(record);
-          }
-        } else if (op === '<') {
-          if (record[condColumn] < constValue) {
-            acc.push(record);
-          }
-        } else if (op === '>') {
-          if (record[condColumn] > constValue) {
-            acc.push(record);
-          }
-        } else if (op === '<>') {
-          if (record[condColumn] !== constValue) {
-            acc.push(record);
-          }
+        if (func(record[condColumn], constValue)) {
+          acc.push(record);
         }
         return acc;
       }, []);
@@ -98,13 +113,73 @@ function SQLEngine(database){
         });
   };
 
-  this.joinConditions = (results, strQuery) {
+  this.joinCondition = (results, joinClause) => {
+    // JOIN <table> ON <value> <operator> <value>
+    let {joinTableName, condColumn, constValue, func} = joinClause;
+    let tableData = this.getTableData(joinTableName);
+
+    let newResults = results.reduce((acc, rowObj) => {
+      acc = tableData.reduce((acc1, rowObj1) => {
+        let leftValue, rightValue;
+        if (rowObj[condColumn]) {
+          leftValue = rowObj[condColumn];
+          rightValue = rowObj1[constValue];
+        } else {
+          leftValue = rowObj[constValue];
+          rightValue = rowObj1[condColumn];
+        }
+
+        let joinRecord = {};
+        Object.keys(rowObj).forEach((k) => {
+           joinRecord[k] = rowObj[k];
+        });
+        Object.keys(rowObj1).forEach((k) => {
+           joinRecord[k] = rowObj1[k];
+        });
+
+        if (func(leftValue, rightValue)) {
+          acc1.push(joinRecord);
+        }
+        return acc1;
+      }, acc);
+      return acc;
+    }, []);
+    return newResults;
+  }
+
+  this.joinConditions = (results, strQuery, idxWhere) => {
 
       // parse strQuery to extract all the join clauses
       // iterate join clauses, pass the intermediate results and join
       // clause to this.joinCondition to determine the new result set
+      let joinClauses = [];
+      let idxJoin = strQuery.search(reJoin);
+      while (idxJoin >= 0) {
+        let idxNextJoin = strQuery.substring(idxJoin + 4).search(reJoin);
+        let joinStmt = '';
+        if (idxNextJoin >= 0) {
+          joinStmt = strQuery.substring(idxJoin + 4, idxNextJoin + idxJoin + 4).trim();
+          idxJoin = idxNextJoin + idxJoin + 4;
+        } else {
+          // check for where clause
+          if (idxWhere >= 0) {
+            joinStmt = strQuery.substring(idxJoin + 4, idxWhere).trim();
+          } else {
+            joinStmt = strQuery.substring(idxJoin + 4).trim();
+          }
+          idxJoin = -1;
+        }
+        let idxOn = joinStmt.search(reON);
+        let joinTableName = joinStmt.substring(0, idxOn).trim();
+        let joinCondition = joinStmt.substring(idxOn + 2).replace(/\s/g, '');
+        let joinInfo  = this.parseCondition(joinCondition);
+        joinInfo['joinTableName'] = joinTableName;
+        joinClauses.push(joinInfo);
+      }
 
-
+      joinClauses.forEach((joinClause) => {
+        results = this.joinCondition(results, joinClause);
+      })
       return results;
   }
 
@@ -126,12 +201,7 @@ function SQLEngine(database){
     //  7) Do projection
 
     let strQuery = query.trim();
-    console.log (strQuery);
-
-    let reFrom =  /FROM/i;
-    let reJoin =  /JOIN/i;
-    let reWhere = /WHERE/i
-
+    console.log(strQuery);
     let idxFrom = strQuery.search(reFrom);
     let idxJoin = strQuery.search(reJoin);
     let idxWhere = strQuery.search(reWhere);
@@ -140,7 +210,7 @@ function SQLEngine(database){
     let primaryTableName = strQuery.substring(idxFrom + 4, idxNextKeyword).trim();
 
     let results = this.getTableData(primaryTableName);
-    results = this.joinConditions(results, strQuery);
+    results = this.joinConditions(results, strQuery, idxWhere);
     results = this.filterResult(results, strQuery, idxWhere);
     results = this.projection(results, strQuery, idxFrom);
 
@@ -156,12 +226,14 @@ var movieDatabase = {
     { id: 2, name: 'Titanic', directorID: 1 },
     { id: 3, name: 'Infamous', directorID: 2 },
     { id: 4, name: 'Skyfall', directorID: 3 },
-    { id: 5, name: 'Aliens', directorID: 1 }
+    { id: 5, name: 'Aliens', directorID: 1 },
+    { id: 6, name: 'Pirates of the Caribbean: Dead Man\'s Chest', directorID: 9 },
   ],
   actor: [
     { id: 1, name: 'Leonardo DiCaprio' },
     { id: 2, name: 'Sigourney Weaver' },
     { id: 3, name: 'Daniel Craig' },
+     { id: 9, name: 'Gore Verbinski' },
   ],
   director: [
     { id: 1, name: 'James Cameron' },
@@ -191,23 +263,32 @@ console.log(actual3);
 let actual3a = engine.execute('SELECT movie.name, movie.id FROM movie WHERE movie.name = \'Titanic\'');
 console.log(actual3a);
 
-// let actual4 = engine.execute('SELECT movie.name, director.name '
-//                            +'FROM movie '
-//                            +'JOIN director ON director.id = movie.directorID');
+let actual4 = engine.execute('SELECT movie.name, director.name '
+                           +'FROM movie '
+                           +'JOIN director ON director.id = movie.directorID');
+console.log(actual4);
 
+let actual6 = engine.execute('SELECT movie.name, director.name '
+                           +'FROM director '
+                           +'JOIN movie ON director.id = movie.directorID');
+console.log(actual6);
 
-//
-// let actual3 = engine.execute('SELECT movie.name, director.name '
-//                            +'FROM movie '
-//                            +'JOIN director ON director.id = movie.directorID');
-// console.log(actual3);
-//
-// let actual4 = engine.execute('SELECT movie.name, actor.name '
-//                            +'FROM movie '
-//                            +'JOIN actor_to_movie ON actor_to_movie.movieID = movie.id '
-//                            +'JOIN actor ON actor_to_movie.actorID = actor.id '
-//                            +'WHERE actor.name <> \'Daniel Craig\'');
-// console.log(actual4);
+let actual7 = engine.execute('SELECT movie.name, director.name '
+                           +'FROM director '
+                           +'JOIN movie ON director.id = movie.directorID '
+                           +'WHERE director.name = \'Sam Mendes\'');
+console.log(actual7);
+
+let actual5 = engine.execute('SELECT movie.name, actor.name '
+                           +'FROM movie '
+                           +'JOIN actor_to_movie ON actor_to_movie.movieID = movie.id '
+                           +'JOIN actor ON actor_to_movie.actorID = actor.id '
+                           +'WHERE actor.name <> \'Daniel Craig\'');
+console.log(actual5);
+
+let actual8 = engine.execute('SELECT movie.name FROM movie '
+                            + 'WHERE movie.name = \'Pirates of the Caribbean: Dead Man\'\'s Chest\'');
+console.log(actual8);
 
 /*describe('execution',function(){
   var engine = new SQLEngine(movieDatabase);
