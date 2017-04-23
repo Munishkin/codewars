@@ -98,6 +98,16 @@ function SQLEngine(database){
         });
   };
 
+  this.joinConditions = (results, strQuery) {
+
+      // parse strQuery to extract all the join clauses
+      // iterate join clauses, pass the intermediate results and join
+      // clause to this.joinCondition to determine the new result set
+
+
+      return results;
+  }
+
   this.execute = (query) => {
 
     // 1) Find fields to query
@@ -130,6 +140,7 @@ function SQLEngine(database){
     let primaryTableName = strQuery.substring(idxFrom + 4, idxNextKeyword).trim();
 
     let results = this.getTableData(primaryTableName);
+    results = this.joinConditions(results, strQuery);
     results = this.filterResult(results, strQuery, idxWhere);
     results = this.projection(results, strQuery, idxFrom);
 
