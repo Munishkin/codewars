@@ -17,12 +17,8 @@ const isPolydivisible = (s, b) => {
     return total + charPos * Math.pow(b, k - i - 1)
   }, 0);
 
-  if (Math.floor(base10 / k) !== (base10 / k)) {
-  	return false;
-  }
-
-  const nextSmallerNumber = s.slice(0, k - 1);
-  return isPolydivisible(nextSmallerNumber, b);
+  return (Math.floor(base10 / k) !== (base10 / k)) ? false :
+    isPolydivisible(s.slice(0, k - 1), b)
 }
 
 const getPolydivisible = (n, b) => {
