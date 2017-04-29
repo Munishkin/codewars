@@ -10,23 +10,18 @@ const isPolydivisible = (s, b) => {
   // 	if not then return false
   // return true
   const k = s.length;
-  console.log(k);
-  if (k === 0) {
-  	return true;
-  }
+  if (k === 0) { return true; }
 
-  // convert s to base 10
-  let base10 = 0;
-  for (let i = k - 1; i >=0 0; i--) {
+  const base10 = s.split('').reduce((total, c, i) => {
+    const charPos = CHARS.indexOf(c);
+    return total + charPos * Math.pow(b, k - i - 1)
+  }, 0);
 
-  }
   if (Math.floor(base10 / k) !== (base10 / k)) {
   	return false;
   }
 
   const nextSmallerNumber = s.slice(0, k - 1);
-  console.log({nextSmallerNumber: nextSmallerNumber});
-
   return isPolydivisible(nextSmallerNumber, b);
 }
 
@@ -35,9 +30,11 @@ const getPolydivisible = (n, b) => {
   return 0;
 }
 
+
 console.log(isPolydivisible("1232", 10) ===  true)
 console.log(isPolydivisible("123220", 10) ===  false)
 console.log(isPolydivisible("123220", 6) === true)
+console.log(isPolydivisible("Js", 62) ===  true)
 
 // console.log(getPolydivisible(22, 10) === "32")
 // console.log(getPolydivisible(42, 16) === "42")
