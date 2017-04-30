@@ -8,8 +8,23 @@ const convertToBase10 = (s, b) =>  {
   }, 0);
 }
 
-const convertFromBase10 = (s, b) => {
-    return 0;
+/* Conver  number (integer) to base 10 to base B  */
+const convertFromBase10 = (number, b) => {
+
+    // mod b, concatenate the string
+    // after done, rever the string to get the result
+    let str = '';
+    let result = number;
+    while (result >= b) {
+      const remainder = result % b;
+      result = Math.floor(result / b);
+      str = `${CHARS[remainder]}${str}`;
+    }
+
+    if (result > 0) {
+      str = `${CHARS[result]}${str}`;
+    }
+    return str;
 }
 
 const isPolydivisible = (s, b) => {
@@ -33,30 +48,33 @@ const isPolydivisible = (s, b) => {
 const getPolydivisible = (n, b) => {
   //your code here
   const getPolydivislbleHelper = (n, b, accuPolyDivNum) => {
-    if (n === 0) {
-      return accuPolyDivNum;
-    }
+    if (n === 1) { return accuPolyDivNum; }
 
-    // convert this from base b to 10
-    // plus 1
-    // convert from base 10 to base b
-    const nextPolyDivNum = "" + convertFromBase10(convertToBase10(accuPolyDivNum, b) + 1, b);
+    // convert the number  from base b to 10 and increment by 1
+    // convert the incremented number from base 10 to base b
+    // if the incremented number is a polydivisible number, we found the (n - 1)th
+    // find the nth polydivisible number
+    const nextPolyDivNum = convertFromBase10(convertToBase10(accuPolyDivNum, b) + 1, b);
     return getPolydivislbleHelper(
       isPolydivisible(nextPolyDivNum, b) ? n - 1 : n, b, nextPolyDivNum);
   }
-
-  if (n === 0) {
-    return 0;
-  }
-
-  return getPolydivislbleHelper(n, b, "0");
+  if (n <= 0) return '';
+  return (n === 1) ? '0' : getPolydivislbleHelper(n, b, "0");
 }
 
+console.log(isPolydivisible("1232", 10) ===  true)
+console.log(isPolydivisible("123220", 10) ===  false)
+console.log(isPolydivisible("123220", 6) === true)
+console.log(isPolydivisible("Js", 62) ===  true)
 
-// console.log(isPolydivisible("1232", 10) ===  true)
-// console.log(isPolydivisible("123220", 10) ===  false)
-// console.log(isPolydivisible("123220", 6) === true)
-// console.log(isPolydivisible("Js", 62) ===  true)
+console.log(convertFromBase10(10, 62) === 'A');
+console.log(convertFromBase10(64, 62) === '12');
+console.log(convertFromBase10(1232, 62) === 'Js');
+console.log(convertFromBase10(9990, 62) === '2b8');
+
+console.log(getPolydivisible(22, 10))
+console.log(getPolydivisible(42, 16))
 
 console.log(getPolydivisible(22, 10) === "32")
 console.log(getPolydivisible(42, 16) === "42")
+console.log(getPolydivisible(1, 10) === "0")
