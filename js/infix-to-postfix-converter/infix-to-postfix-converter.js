@@ -43,13 +43,11 @@ const toPostfix = (expression) => {
   let result = expression.replace(/\s/g, '')
     .split('')
     .reduce((postfix, o) => {
-        console.log({o: o});
         // read a number
         if (DIGITS.indexOf(o) >= 0) {
           postfix += o;
         } else if (LEFT_ASSOC.indexOf(o) >= 0 || RIGHT_ASSOC.indexOf(o) >= 0) {
           // read an operator
-          console.log({operatorStack: operatorStack});
           if (operatorStack.length > 0) {
             let o2 = operatorStack[0];
             while ( (LEFT_ASSOC.includes(o) && PRECEDENCE[o] <= PRECEDENCE[o2])
@@ -59,30 +57,23 @@ const toPostfix = (expression) => {
                 o2 = operatorStack[0];
             }
           }
-          console.log({operatorStack: operatorStack});
           // push operator to stack
           operatorStack.unshift(o);
-          console.log({operatorStack: operatorStack});
         } else if (o === '(') {
           operatorStack.unshift(o);
-          console.log({operatorStack: operatorStack});
         } else if (o === ')') {
           // Until the token at the top of the stack is a left parenthesis,
           // pop operators off the stack onto the output queue.
-          console.log({operatorStack: operatorStack});
-          let tempOperator = operatorStack.shift();
-          while (operatorStack.length > 0 && tempOperator !== '(' ) {
-            postfix += tempOperator;
-            tempOperator = operatorStack.shift();
-          }
-          console.log({operatorStack: operatorStack});
-          if (tempOperator !== '(') {
+          const idxLeftParen = operatorStack.indexOf('(');
+          if (idxLeftParen >= 0) {
+            postfix += operatorStack.splice(0, idxLeftParen).join('');
+            operatorStack.splice(0, 1);
+          } else {
             throw 'No matching left parenthesis';
           }
-        } else if (DIGITS.indexOf(o) < 0) {
+        } else {
           throw 'Unknown token';
         }
-        console.log({postfix: postfix});
         return postfix;
     }, '');
 
@@ -90,13 +81,11 @@ const toPostfix = (expression) => {
     if (operatorStack.length > 0 && PARENTHESIS.indexOf(operatorStack[0]) >= 0) {
       throw 'Unmatched parenthesis';
     }
-    console.log({operatorStack: operatorStack});
     result += operatorStack.join('');
     return result;
 }
 
-// console.log(toPostfix("2 + 7 * 5") === '275*+'); // Should return "275*+"
-// console.log(toPostfix("2+7*5") === '275*+'); // Should return "275*+"
-// console.log(toPostfix("3*3/(7+1)") === '33*71+/'); // Should return "33*71+/"
-// console.log(toPostfix("5+(6-2)*9+3^(7-1)"));
+console.log(toPostfix("2 + 7 * 5") === '275*+'); // Should return "275*+"
+console.log(toPostfix("2+7*5") === '275*+'); // Should return "275*+"
+console.log(toPostfix("3*3/(7+1)") === '33*71+/'); // Should return "33*71+/"
 console.log(toPostfix("5+(6-2)*9+3^(7-1)") === '562-9*+371-^+'); // Should return "562-9*+371-^+"
