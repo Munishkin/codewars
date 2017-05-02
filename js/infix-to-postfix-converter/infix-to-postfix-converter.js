@@ -51,7 +51,7 @@ const toPostfix = (expression) => {
           if (operatorStack.length > 0) {
             let o2 = operatorStack[0];
             while ( (LEFT_ASSOC.includes(o) && PRECEDENCE[o] <= PRECEDENCE[o2])
-                || (RIGHT_ASSOC.includes(o) && PRECEDENCE[o] < PRECEDENCE[o2])) {
+                || (RIGHT_ASSOC.includes(o) && PRECEDENCE[o] < PRECEDENCE[o2]) ) {
                 // pop o2 from operator stack to postfix
                 postfix += operatorStack.shift();
                 o2 = operatorStack[0];
