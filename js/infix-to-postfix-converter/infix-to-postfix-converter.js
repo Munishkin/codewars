@@ -25,7 +25,8 @@ When there are no more tokens to read:
     * Pop the operator onto the output queue.
 Exit.*/
 
-const LEFT_ASSOC = ['+', '-', '*', '/'];
+const LEFT_ASSOC = '+-*/';
+const RIGHT_ASSOC = '^';
 const PRECEDENCE = {
   '+': 1,
   '-': 1,
@@ -33,8 +34,8 @@ const PRECEDENCE = {
   '/': 2,
   '^': 3
 };
-const RIGHT_ASSOC = ['^'];
 const DIGITS = '01234567890';
+const PARENTHESIS = '()'
 
 const toPostfix = (expression) => {
 
@@ -42,13 +43,14 @@ const toPostfix = (expression) => {
   let result = expression.replace(/\s/g, '')
     .split('')
     .reduce((postfix, o) => {
+        console.log({o: o});
         // read a number
-        if (o.indexOf(LEFT_ASSOC) >= 0 || o.indexOf(RIGHT_ASSOC) >= 0) {
+        if (LEFT_ASSOC.indexOf(o) >= 0 || RIGHT_ASSOC.indexOf(o) >= 0) {
           // read an operator
           if (operatorStack.length > 0) {
             const o2 = operatorStack[0];
-            if ( (LEFT_ASSOC.includes(o) && PRECEDENCE[o] <= PRECEDNCE[o2])
-                || (RIGHT_ASSOC.includes(o) && PRECEDENCE[o] < PRECEDNCE[o2])) {
+            if ( (LEFT_ASSOC.includes(o) && PRECEDENCE[o] <= PRECEDENCE[o2])
+                || (RIGHT_ASSOC.includes(o) && PRECEDENCE[o] < PRECEDENCE[o2])) {
                 // pop o2 from operator stack to postfix
                 postfix += operatorStack.shift();
             }
@@ -60,18 +62,25 @@ const toPostfix = (expression) => {
         } else if (o === ')') {
           // Until the token at the top of the stack is a left parenthesis,
           // pop operators off the stack onto the output queue.
-          let o = operatorStack.shift();
-          while (operatorStack.length > 0 && o !== '(' ) {
-            postfix += o;
-            o = operatorStack.shift();
+          let tempOperator = operatorStack.shift();
+          while (operatorStack.length > 0 && tempOperator !== '(' ) {
+            postfix += tempOperator;
+            tempOperator = operatorStack.shift();
           }
-        } else if (o.indexOf(DIGITS) < 0) {
-          throw new Error('unknown operator');
+          if (tempOperator !== '(') {
+            throw 'No matching left parenthesis';
+          }
+        } else if (DIGITS.indexOf(o) < 0) {
+          throw 'Unknown token';
         }
         return postfix;
     }, '');
 
     // pop the operands in the stack
+    if (operatorStack.length > 0 && PARENTHESIS.indexOf(operatorStack[0]) >= 0) {
+      throw 'Unmatched parenthesis';
+    }
+    result += operatorStack.join('');
     return result;
 }
 
