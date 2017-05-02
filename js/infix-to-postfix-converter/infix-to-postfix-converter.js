@@ -25,13 +25,57 @@ When there are no more tokens to read:
     * Pop the operator onto the output queue.
 Exit.*/
 
+const LEFT_ASSOC = ['+', '-', '*', '/'];
+const PRECEDENCE = {
+  '+': 1,
+  '-': 1,
+  '*': 2,
+  '/': 2,
+  '^': 3
+};
+const RIGHT_ASSOC = ['^'];
+const DIGITS = '01234567890';
 
 const toPostfix = (expression) => {
-  let result = '';
-  return result;
+
+  const operatorStack = [];
+  let result = expression.replace(/\s/g, '')
+    .split('')
+    .reduce((postfix, o) => {
+        // read a number
+        if (o.indexOf(LEFT_ASSOC) >= 0 || o.indexOf(RIGHT_ASSOC) >= 0) {
+          // read an operator
+          if (operatorStack.length > 0) {
+            const o2 = operatorStack[0];
+            if ( (LEFT_ASSOC.includes(o) && PRECEDENCE[o] <= PRECEDNCE[o2])
+                || (RIGHT_ASSOC.includes(o) && PRECEDENCE[o] < PRECEDNCE[o2])) {
+                // pop o2 from operator stack to postfix
+                postfix += operatorStack.shift();
+            }
+          }
+          // push operator to stack
+          operatorStack.unshift(o);
+        } else if (o === '(') {
+          operatorStack.unshift(o);
+        } else if (o === ')') {
+          // Until the token at the top of the stack is a left parenthesis,
+          // pop operators off the stack onto the output queue.
+          let o = operatorStack.shift();
+          while (operatorStack.length > 0 && o !== '(' ) {
+            postfix += o;
+            o = operatorStack.shift();
+          }
+        } else if (o.indexOf(DIGITS) < 0) {
+          throw new Error('unknown operator');
+        }
+        return postfix;
+    }, '');
+
+    // pop the operands in the stack
+    return result;
 }
 
-
-console.log(toPostfix("2+7*5") === '275*+'); // Should return "275*+"
-console.log(toPostfix("3*3/(7+1)") === '33*71+/'); // Should return "33*71+/"
-console.log(toPostfix("5+(6-2)*9+3^(7-1)") === '562-9*+371-^+'); // Should return "562-9*+371-^+"
+console.log(toPostfix("2 + 7 * 5") === '275*+'); // Should return "275*+"
+// console.log(toPostfix("2+7*5") === '275*+'); // Should return "275*+"
+// console.log(toPostfix("3*3/(7+1)") === '33*71+/'); // Should return "33*71+/"
+// console.log(toPostfix("5+(6-2)*9+3^(7-1)") === '562-9*+371-^+'); // Should return "562-9*+371-^+"
