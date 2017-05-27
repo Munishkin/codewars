@@ -109,6 +109,10 @@ console.log(codewarsTshirts(6,[["Red","Black"],["Red","Black"],["Red","Black"]])
 console.log(codewarsTshirts(6,[["White","Purple"],["Purple","Blue"],["Blue","Orange"],["Orange","Red"],["Red","Black"],["Black","White"]]) === true);
 console.log(codewarsTshirts(24,[]) === true);
 console.log(codewarsTshirts(6,[["Red","Black"],["Red","Black"],["Blue","Black"]]) === true);
+
+const n = 18
+const orders = [["Purple","White"],["Red","Purple"],["Black","Red"],["Purple","Blue"],["Black","Blue"],["White","Purple"],["Red","Blue"],["Purple","Blue"],["Black","White"],["Red","Orange"],["Orange","Black"],["Purple","White"],["White","Blue"],["Orange","Blue"],["Blue","Red"],["Black","Purple"],["Black","Orange"],["Red","Black"],["Orange","Black"],["White","Blue"]]
+console.log(codewarsTshirts(n, orders));
 /*console.log(codewarsTshirts(6,[["Blue","Purple"]]) === true);
 console.log(codewarsTshirts(18,
   [["Black","Blue"],["Purple","Blue"],["Blue","White"],["White","Orange"],["White","Blue"],
