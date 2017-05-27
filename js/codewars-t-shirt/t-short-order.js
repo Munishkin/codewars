@@ -30,8 +30,6 @@ const generateOrderIndices = (orderIndices) => {
    return result;
 }
 
-const cacheShirtResult = {};
-
 const satisfyOrder = (quantity, orders, orderIndices) => {
   const shirtMap = {
       'White': quantity,
@@ -42,11 +40,6 @@ const satisfyOrder = (quantity, orders, orderIndices) => {
       'Black': quantity
   };
 
-  // orders.forEach((order, i) => {
-  //   const shirt = order[orderIndices[i]];
-  //   shirtMap[shirt] -= 1;
-  // });
-  //console.log(orderIndices);
   for (let i = 0; i < orders.length; i++) {
     const order = orders[i];
     const shirt = order[orderIndices[i]];
@@ -56,7 +49,7 @@ const satisfyOrder = (quantity, orders, orderIndices) => {
   return true;
 };
 
-const codewarsTshirts = (n, orders) => {
+const codewarsTshirts_old = (n, orders) => {
   //coding and coding..
 
   // find out the quantity of each type of shirt
@@ -91,32 +84,133 @@ const codewarsTshirts = (n, orders) => {
   return false;
 }
 
+const buildShirtOrder = (cachedShirtResults, orders, orderIndices) => {
+
+  const stringKey = JSON.stringify(orderIndices);
+  //console.log({stringKey: stringKey});
+  const cached = cachedShirtResults[stringKey];
+  //console.log(cached);
+  if (!cached) {
+      return [];
+  }
+
+  const firstShirt = orders[orderIndices.length][0];
+  const secondShirt = orders[orderIndices.length][1];
+  const firstShirtRemQty = cached[firstShirt] - 1;
+  const secondShirtRemQty = cached[secondShirt] - 1;
+
+  //console.log({orderIndices: orderIndices, firstShirt: firstShirt, firstShirtRemQty: firstShirtRemQty,
+  //  secondShirt: secondShirt, secondShirtRemQty: secondShirtRemQty});
+
+  const newOrderIndices = [];
+  let cloned = null;
+  let clonedCache = null;
+  let strKey = null;
+  if (firstShirtRemQty >= 0) {
+      // feasible solution
+      cloned = JSON.parse(JSON.stringify(orderIndices));
+      cloned.push(0);
+      strKey = JSON.stringify(cloned);
+      //console.log({xxx: strKey});
+      clonedCache = JSON.parse(JSON.stringify(cached));
+      clonedCache[firstShirt] = firstShirtRemQty;
+      cachedShirtResults[strKey] = clonedCache;
+      newOrderIndices.push(cloned);
+  }
+
+  if (secondShirtRemQty >= 0) {
+      // feasible solution
+      cloned = JSON.parse(JSON.stringify(orderIndices));
+      cloned.push(1);
+      strKey = JSON.stringify(cloned);
+      //console.log({xxx: strKey});
+      clonedCache = JSON.parse(JSON.stringify(cached));
+      clonedCache[secondShirt] = secondShirtRemQty;
+      cachedShirtResults[strKey] = clonedCache;
+      newOrderIndices.push(cloned);
+  }
+  //console.log(cachedShirtResults);
+  return newOrderIndices;
+}
+
+const codewarsTshirts = (n, orders) => {
+  //coding and coding..
+
+  // find out the quantity of each type of shirt
+  // use brute force, loop each order, deduct the quantity. if quantity falls below
+  // zero, backtrack and try the next combination
+  // if a combination is found where order is satisfied, return true
+  // if no combination is found, then return false
+  const NUM_SHIRTS = n / 6;
+  const orderCombinations = [];
+  if (orders.length <= 1) { return true; }
+
+  // set base cases
+  const cachedShirtResults = {};
+
+  const firstShirt = orders[0][0];
+  const secondShirt = orders[0][1];
+  const shirtMap = {
+       'White': NUM_SHIRTS,
+       'Orange': NUM_SHIRTS,
+       'Blue': NUM_SHIRTS,
+       'Purple': NUM_SHIRTS,
+       'Red': NUM_SHIRTS,
+       'Black': NUM_SHIRTS
+  };
+  shirtMap[firstShirt] -= 1;
+  cachedShirtResults[JSON.stringify([0])] = JSON.parse(JSON.stringify(shirtMap));
+  shirtMap[firstShirt] = NUM_SHIRTS;
+  shirtMap[secondShirt] -= 1;
+  cachedShirtResults[JSON.stringify([1])] = JSON.parse(JSON.stringify(shirtMap));
+
+  orderCombinations.push([0]);
+  orderCombinations.push([1]);
+
+  while (orderCombinations.length > 0) {
+    const orderIndices = orderCombinations.shift();
+
+    // build up solution and update cachedShirtResults
+    newOrderIndices = buildShirtOrder(cachedShirtResults, orders, orderIndices);
+    if (newOrderIndices.length > 0 && newOrderIndices[0].length === orders.length) {
+      return true;
+    }
+    //console.log(newOrderIndices);
+
+
+    newOrderIndices.forEach((o) => {
+      orderCombinations.push(o);
+    })
+  }
+//  console.log(cachedShirtResults);
+  return false;
+}
 
 /*
-  [0 0 0]
-  [0 0 1] [0 1 0] [1 0 0] [0 1 1]
-  [1 1 0] [1 0 1]
-  [1 1 1]
+  0
+  1
+  0 0
+  0 1
+  1 0
+  1 1
+  0 0 0
+  0 0 1
+  0 1 0
+  0 1 1
+  1 0 0
+  1 0 1
+
 */
 
 
-/*[0 0 0 0]
-[0 0 0 1] [0 0 1 0] [0 1 0 0] [1 0 0 0]
-[0 0 1 1] [0 1 0 1] [1 0 0 1] [0 1 1 0] [1 0 1 0] [1 1 0 0]
-[0 1 1 1] [1 0 1 1] [1 1 0 1] [1 1 1 0]
-[1 1 1 1]
-*/
-
-// console.log(generateOrderIndices([0,0,0,0]))
-// console.log(generateOrderIndices([0,0,0,1]))
-// console.log(generateOrderIndices([0,1,0,1]))
-
-/*
 console.log(codewarsTshirts(6,[["Red","Black"],["Red","Black"]]) === true);
+
 console.log(codewarsTshirts(6,[["Red","Black"],["Red","Black"],["Red","Black"]]) === false);
-console.log(codewarsTshirts(6,[["White","Purple"],["Purple","Blue"],["Blue","Orange"],["Orange","Red"],["Red","Black"],["Black","White"]]) === true);
+console.log(codewarsTshirts(6,[["White","Purple"],["Purple","Blue"],["Blue","Orange"],
+["Orange","Red"],["Red","Black"],["Black","White"]]) === true);
 console.log(codewarsTshirts(24,[]) === true);
 console.log(codewarsTshirts(6,[["Red","Black"],["Red","Black"],["Blue","Black"]]) === true);
+
 console.log(codewarsTshirts(6,[["Blue","Purple"]]) === true);
 console.log(codewarsTshirts(18,
   [["Black","Blue"],["Purple","Blue"],["Blue","White"],["White","Orange"],["White","Blue"],
@@ -125,11 +219,11 @@ console.log(codewarsTshirts(18,
   ["Purple","Blue"],["Orange","Red"]]) === true);
 console.log(codewarsTshirts( 6, [ ["Purple","Black"], ["Black","Red"], ["Red","Purple"], ["Red","Purple"],
     ["White","Orange"] ] )=== false);
-*/
 
 
-const n = 18
-const orders = [
+
+let n = 18
+let orders = [
     ["Purple","White"],
     ["Red","Purple"],
     ["Black","Red"],
@@ -150,4 +244,8 @@ const orders = [
     ["Red","Black"],
     ["Orange","Black"],
     ["White","Blue"]]
+console.log(codewarsTshirts(n, orders));
+
+n = 30
+orders = [["Orange","Black"],["White","Blue"],["Purple","Red"],["Black","Red"],["White","Black"],["Black","Orange"],["Orange","Black"],["Red","Purple"],["Purple","White"],["Red","Black"],["Orange","Purple"],["White","Red"],["White","Purple"],["Black","White"],["Blue","Purple"],["Orange","Red"],["Blue","Red"],["Red","Blue"],["White","Red"]]
 console.log(codewarsTshirts(n, orders));
