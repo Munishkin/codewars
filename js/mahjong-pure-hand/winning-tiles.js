@@ -24,24 +24,116 @@ winning hand with the given tiles.
 Input
 A string of 13 non-zero digits in non-decreasing order, denoting different 
 tiles of a suit.
-
+  
 Output
 A string of unique non-zero digits in ascending order.
 */
 
-const solution = (tiles) => {
-  // for tile from 1 to 9, insert tile to hand
-  // tally 
+const FOUR_MELDS_LEN = 12;
+const HAND_LEN = FOUR_MELDS_LEN + 2;
+const IDENTICAL_PIECES = 3;
+const PAIR_LEN = 2;
+
+const hasWinningHand = (tiles, tile) => {
+  // tally the occurrence of each tile
+  // find tile that has >= 2 pieces
+  // make it as a pair,  determine if the remaining 12 pieces can form 4 Melds
+  //  - 4 groups of consecutive tiles or
+  //  - 3 groups of consecutive tiles and 1 group of 3 identical tiles
+  //  - 2 groups of consecutive tiles and 2 group of 3 identical tiles
+  //  - 1 groups of consecutive tiles and 3 group of 3 identical tiles
+  //  - 0 groups of consecutive tiles and 4 group of 3 identical tiles
   
-  return '';
+  const hand = `${tiles}${tile}`.split('');
+  if (hand && hand.length !== HAND_LEN) { return ''; }
+  
+  const counts = hand.reduce((acc, o) => {
+              acc[o] = (acc && acc[o] && acc[o] + 1) || 1;
+              return acc;
+          }, {});
+  const pairs = Object.keys(counts).filter((t) => {
+    return counts[t] >= PAIR_LEN;
+  });
+
+  const hasFourMelds = (counter) => {
+    
+    for (let i = 1; i <= 7; i++) {
+      const countsCopy = JSON.parse(JSON.stringify(counter));
+      console.log({countsCopy: countsCopy});
+      let combination = '';
+      for (let j = i; j <= 7; j++) {
+        while (countsCopy[j] >= 1 && countsCopy[j+1] >= 1 && countsCopy[j+2] >= 1) {
+          // if three consecutive tiles are found, take them out 
+          countsCopy[j] -= 1;
+          countsCopy[j+1] -= 1;
+          countsCopy[j+2] -= 1;
+          combination += `${j}${j+1}${j+2}`;
+        }
+      }
+      console.log('after sheung:');
+      console.log({countsCopy: countsCopy});
+      console.log({combination: combination});
+      if (combination.length !== FOUR_MELDS_LEN) {
+          // any tile with 3 identical piece
+          const numOfPongsNeeded = (FOUR_MELDS_LEN - combination.trim().length) / IDENTICAL_PIECES;
+          const pongList = Object.keys(countsCopy).filter((t) => { return countsCopy[t] >= IDENTICAL_PIECES; });
+          // console.log({numOfPongsNeeded: numOfPongsNeeded, pongList: pongList });
+          if (numOfPongsNeeded === pongList.length) {
+             pongList.forEach((t) => {
+                combination += `${t.repeat(IDENTICAL_PIECES)}`;
+             });
+             return combination;
+          }
+      } else {
+        // form 4 groups of 3 consecutive tiles
+        return combination;
+      }
+    }
+    return '';
+  }
+  
+  console.log({pairs: pairs});
+  for (let i = 0; i < pairs.length; i++) {
+    //if (pairs[i] !== '7') { continue; }
+    counts[pairs[i]] -= PAIR_LEN;
+    console.log({pair: pairs[i]});
+    const combination = hasFourMelds(counts);
+    if (combination) {
+      console.log(`${combination}${pairs[i]}${pairs[i]}`);
+      return true;
+    }   
+    counts[pairs[i]] += PAIR_LEN; 
+  }    
+  return false;
+}
+
+const solution = (tiles) => {
+  // for tile from 1 to 9, insert tile to tiles to form a hand with 14 tiles
+  // if hand is a winning hand, then append tile to result
+  // when done, return result
+  let result = '';
+  for (let i = 5; i <= 5; i++) {
+    if (hasWinningHand(tiles, i)) {
+      result += i;
+    }
+  }
+  //console.log({result: result});
+  return result;
 }
 
 const cases = [
-  ["1113335557779", "89"],
-  ["1223334455678", "258"],
+  // ["1113335557779", "89"],
+  // ["1223334455678", "258"],
+  ["1111223346788", "58"]
 ];
 
 cases.forEach((o) => {
   const [hand, expected] = o;
   console.log(solution(hand) === expected);
 }) 
+
+// 111 123 234 567 88
+// 
+// 111 123 234 678 88
+// 
+// 11 123 123 456 788
