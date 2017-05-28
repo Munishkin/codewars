@@ -84,9 +84,6 @@ const hasWinningHand = (tiles, tile) => {
           sheungCombination += `${j}${j+1}${j+2}`;
         }
       }
-      // console.log(`after sheung: ${i}`);
-      // console.log({countsCopy: countsCopy});
-      // console.log({sheungCombination: sheungCombination});
       if ((combination.length + sheungCombination.length) === FOUR_MELDS_LEN) {
         return combination + sheungCombination;
       } else {
@@ -172,8 +169,8 @@ const cases = [
 cases.forEach((o) => {
   const [hand, expected] = o;
   console.log(solution(hand) === expected);
-}) 
 
+}) 
 // 111 123 234 567 88
 // 
 // 111 123 234 678 88
