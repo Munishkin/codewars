@@ -39,6 +39,7 @@ const HAND_LEN = FOUR_MELDS_LEN + 2;
 const IDENTICAL_PIECES = 3;
 const PAIR_LEN = 2;
 const MAX_PIECES = 4;
+const SEVEN_PAIRS = 7;
 
 const PONG_COMBINATIONS = {
   1: [ [0] ],
@@ -59,23 +60,29 @@ const hasWinningHand = (tiles, tile) => {
   //  - 1 groups of consecutive tiles and 3 group of 3 identical tiles
   //  - 0 groups of consecutive tiles and 4 group of 3 identical tiles
 
-  // const hand = `${tiles}${tile}`.split('');
-  // if (hand && hand.length !== HAND_LEN) { return ''; }
-  //
-  // const counts = hand.reduce((acc, o) => {
-  //             acc[o] = (acc && acc[o] && acc[o] + 1) || 1;
-  //             return acc;
-  //         }, {});
-  // const pairs = Object.keys(counts).filter((t) => {
-  //   return counts[t] >= PAIR_LEN;
-  // });
-  //
-  // // need to check that each tile is between 0 and 4
+  const hand = `${tiles} ${tile}`.split(' ');
+
+  console.log({ hand: hand });
+  if (hand && hand.length !== HAND_LEN) { return ''; }
+
+  const counts = hand.reduce((acc, o) => {
+              acc[o] = (acc && acc[o] && acc[o] + 1) || 1;
+              return acc;
+          }, {});
+  const pairs = Object.keys(counts).filter((t) => {
+    return counts[t] >= PAIR_LEN;
+  });
+
+  // need to check that each tile is between 0 and 4
   // const tooManyPieces = Object.keys(counts).some((t) => {
   //   return counts[t] < 0 || counts[t] > MAX_PIECES;
   // });
   //
   // if (tooManyPieces) { return ''; }
+  //
+  // // check if a hand has seven pairs
+  // const hasSevenPairs = Object.keys(counts).length === 7;
+  // if (hasSevenPairs) { return true; }
   //
   // const buildThreeConsecutiveTiles = (combination, countsCopy) => {
   //   for (let i = 1; i <= 7; i++) {
@@ -156,11 +163,19 @@ const solution = (tiles) => {
   // if hand is a winning hand, then append tile to result
   // when done, return result
   let result = '';
-  for (let i = 1; i <= 9; i++) {
-    if (hasWinningHand(tiles, i)) {
+  '123456789'.split('').forEach((i) => {
+    ['p', 'm', 's'].forEach((suit) => {
+      if (hasWinningHand(tiles, `${i}${suit}`)) {
+        result += i;
+      }
+    });
+  });
+  // check honor tiles
+  '1z 2z 3z 4z 5z 6z 7z'.split(' ').forEach((tile) => {
+    if (hasWinningHand(tiles, tile)) {
       result += i;
     }
-  }
+  });
   return result;
 }
 
