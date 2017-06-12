@@ -40,7 +40,7 @@ const IDENTICAL_PIECES = 3;
 const PAIR_LEN = 2;
 const MAX_PIECES = 4;
 const SEVEN_PAIRS = 7;
-const SUITS = ['p', 'm', 's'];
+const SUITS = ['p', 's', 'm'];
 
 const PONG_COMBINATIONS = {
   1: [ [0] ],
@@ -50,17 +50,7 @@ const PONG_COMBINATIONS = {
        [0,1,2],[0,1,3],[0,2,3],[1,2,3], [0, 1, 2, 3] ]
 }
 
-
 const hasWinningHand = (tiles, tile) => {
-  // tally the occurrence of each tile
-  // find tile that has >= 2 pieces
-  // make it as a pair,  determine if the remaining 12 pieces can form 4 Melds
-  //  - 4 groups of consecutive tiles or
-  //  - 3 groups of consecutive tiles and 1 group of 3 identical tiles
-  //  - 2 groups of consecutive tiles and 2 group of 3 identical tiles
-  //  - 1 groups of consecutive tiles and 3 group of 3 identical tiles
-  //  - 0 groups of consecutive tiles and 4 group of 3 identical tiles
-
   const hand = `${tiles} ${tile}`.split(' ');
   if (hand && hand.length !== HAND_LEN) { return false; }
 
@@ -175,8 +165,8 @@ const solution = (tiles) => {
   // if hand is a winning hand, then append tile to result
   // when done, return result
   let result = '';
-  '123456789'.split('').forEach((i) => {
-    SUITS.forEach((suit) => {
+  SUITS.forEach((suit) => {
+    '123456789'.split('').forEach((i) => {
       const tile = `${i}${suit}`;
       if (hasWinningHand(tiles, tile)) {
         result += `${(result > '' ? ' ' : '')}${tile}`;
@@ -195,9 +185,12 @@ const solution = (tiles) => {
 const cases = [
   ["2p 2p 3p 3p 4p 4p 5p 5p 7m 7m 8m 8m 8m", "2p 5p 7m 8m"],
   ["1p 1p 3p 3p 4p 4p 5p 5p 6p 6p 7p 7p 9p", "9p"],
+  ["4p 5p 6p 6p 6p 7s 7s 7s 1m 1m 3z 3z 3z", "3p 6p 1m"],
+  ["4p 4p 4p 4s 4s 4s 3m 3m 3m 4m 3z 3z 3z", "2m 4m 5m"]
 ];
 
 cases.forEach((o) => {
   const [hand, expected] = o;
+  console.log(solution(hand));
   console.log(solution(hand) === expected);
 })
