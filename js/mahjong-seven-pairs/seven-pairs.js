@@ -88,7 +88,7 @@ const hasWinningHand = (tiles, tile) => {
           }
         }
       }
-      const final_hand = `${combination} ${sheungCombination}`;
+      const final_hand = `${combination} ${sheungCombination}`.trim();
       if (final_hand.split(' ').length === FOUR_MELDS_LEN) {
         return final_hand;
       } else {
@@ -111,7 +111,6 @@ const hasWinningHand = (tiles, tile) => {
     // can a winning hand be made without pong
     let feasibleCombination = buildThreeConsecutiveTiles('', countsCopy);
     if (feasibleCombination) {
-      console.log(feasibleCombination);
       return feasibleCombination;
     }
 
@@ -191,6 +190,5 @@ const cases = [
 
 cases.forEach((o) => {
   const [hand, expected] = o;
-  console.log(solution(hand));
   console.log(solution(hand) === expected);
 })
