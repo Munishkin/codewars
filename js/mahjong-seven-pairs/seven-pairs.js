@@ -62,25 +62,7 @@ const hasWinningHand = (tiles, tile) => {
   //  - 0 groups of consecutive tiles and 4 group of 3 identical tiles
 
   const hand = `${tiles} ${tile}`.split(' ');
-
-  //console.log({ hand: hand });
   if (hand && hand.length !== HAND_LEN) { return false; }
-
-  // count number of occurrences of of each tile in a hand
-  const counts = hand.reduce((acc, o) => {
-              acc[o] = (acc && acc[o] && acc[o] + 1) || 1;
-              return acc;
-          }, {});
-  const pairs = Object.keys(counts).filter((t) => {
-    return counts[t] >= PAIR_LEN;
-  });
-
-  // need to check that each tile is between 0 and 4
-  const tooManyPieces = Object.keys(counts).some((t) => {
-    return counts[t] < 0 || counts[t] > MAX_PIECES;
-  });
-
-  if (tooManyPieces) { return false; }
 
   const hasSevenPairs = (counter) => {
     const numPairs = Object.keys(counter)
@@ -155,10 +137,7 @@ const hasWinningHand = (tiles, tile) => {
           pong += `${(pong > '' ? ' ' : '')}${tile} ${tile} ${tile}`;
         }  // end combine pong
         feasibleCombination = buildThreeConsecutiveTiles(pong, countsCopy);
-        if (feasibleCombination) {
-          console.log(feasibleCombination);
-          return feasibleCombination;
-        }
+        if (feasibleCombination) { return feasibleCombination; }
         // restore value
         restoreCount(countsCopy, pong);
       } // end loop combos
@@ -167,13 +146,25 @@ const hasWinningHand = (tiles, tile) => {
     return '';
   }
 
+  // count number of occurrences of of each tile in a hand
+  const counts = hand.reduce((acc, o) => {
+              acc[o] = (acc && acc[o] && acc[o] + 1) || 1;
+              return acc;
+          }, {});
+  const pairs = Object.keys(counts).filter((t) => {
+    return counts[t] >= PAIR_LEN;
+  });
+
+  // need to check that each tile is between 0 and 4
+  const tooManyPieces = Object.keys(counts).some((t) => {
+    return counts[t] < 0 || counts[t] > MAX_PIECES;
+  });
+  if (tooManyPieces) { return false; }
+
   if (hasSevenPairs(counts)) { return true; }
   for (let i = 0; i < pairs.length; i++) {
     counts[pairs[i]] -= PAIR_LEN;
-    const combination = hasFourMelds(counts);
-    if (combination) {
-      return true;
-    }
+    if (hasFourMelds(counts)) { return true; }
     counts[pairs[i]] += PAIR_LEN;
   }
   return false;
