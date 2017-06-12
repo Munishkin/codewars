@@ -185,10 +185,12 @@ const cases = [
   ["2p 2p 3p 3p 4p 4p 5p 5p 7m 7m 8m 8m 8m", "2p 5p 7m 8m"],
   ["1p 1p 3p 3p 4p 4p 5p 5p 6p 6p 7p 7p 9p", "9p"],
   ["4p 5p 6p 6p 6p 7s 7s 7s 1m 1m 3z 3z 3z", "3p 6p 1m"],
-  ["4p 4p 4p 4s 4s 4s 3m 3m 3m 4m 3z 3z 3z", "2m 4m 5m"]
+  ["4p 4p 4p 4s 4s 4s 3m 3m 3m 4m 3z 3z 3z", "2m 4m 5m"],
+  ["5p 5p 5p 6p 6p 9p 9p 9p 7s 8s 9s 3m 3m", ""]
 ];
 
 cases.forEach((o) => {
   const [hand, expected] = o;
-  console.log(solution(hand) === expected);
+  console.log(solution(hand));
+//  console.log(solution(hand) === expected);
 })
