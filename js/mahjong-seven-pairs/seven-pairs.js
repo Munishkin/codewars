@@ -70,7 +70,7 @@ const hasWinningHand = (tiles, tile) => {
                     .reduce((sum, value) => {
                         return sum + value;
                     }, 0);
-    return numPairs === 7;
+    return numPairs === SEVEN_PAIRS;
   }
 
   const restoreCount = (counts, hand) => {
