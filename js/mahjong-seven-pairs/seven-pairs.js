@@ -82,16 +82,15 @@ const hasWinningHand = (tiles, tile) => {
 
   if (tooManyPieces) { return false; }
 
-  // check if a hand has seven pairs
-  // console.log(counts);
-  // const pairs = Object.keys(counts).filter((t) => {
-  //   return counts[t] >= PAIR_LEN;
-  // });
-  // const hasSevenPairs = Object.keys(counts).length === 7
-  // if (hasSevenPairs) {
-  //   console.log('has seven pairs');
-  //   return true;
-  // }
+  const hasSevenPairs = (counter) => {
+    const numPairs = Object.keys(counter)
+                    .map( (k) => { return Math.floor(counter[k] / 2); }  )
+                    .reduce((sum, value) => {
+                        return sum + value;
+                    }, 0);
+    return numPairs === 7;
+  }
+
   const restoreCount = (counts, hand) => {
     // restore value
     if (hand) {
@@ -168,6 +167,7 @@ const hasWinningHand = (tiles, tile) => {
     return '';
   }
 
+  if (hasSevenPairs(counts)) { return true; }
   for (let i = 0; i < pairs.length; i++) {
     counts[pairs[i]] -= PAIR_LEN;
     const combination = hasFourMelds(counts);
@@ -188,7 +188,6 @@ const solution = (tiles) => {
     SUITS.forEach((suit) => {
       const tile = `${i}${suit}`;
       if (hasWinningHand(tiles, tile)) {
-        if (result > '') { result += ' '; }
         result += `${(result > '' ? ' ' : '')}${tile}`;
       }
     });
@@ -209,6 +208,5 @@ const cases = [
 
 cases.forEach((o) => {
   const [hand, expected] = o;
-  console.log(solution(hand));
-//  console.log(solution(hand) === expected);
+  console.log(solution(hand) === expected);
 })
