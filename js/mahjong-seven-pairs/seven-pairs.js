@@ -40,6 +40,7 @@ const IDENTICAL_PIECES = 3;
 const PAIR_LEN = 2;
 const MAX_PIECES = 4;
 const SEVEN_PAIRS = 7;
+const SUITS = ['p', 'm', 's'];
 
 const PONG_COMBINATIONS = {
   1: [ [0] ],
@@ -62,9 +63,10 @@ const hasWinningHand = (tiles, tile) => {
 
   const hand = `${tiles} ${tile}`.split(' ');
 
-  console.log({ hand: hand });
-  if (hand && hand.length !== HAND_LEN) { return ''; }
+  //console.log({ hand: hand });
+  if (hand && hand.length !== HAND_LEN) { return false; }
 
+  // count number of occurrences of of each tile in a hand
   const counts = hand.reduce((acc, o) => {
               acc[o] = (acc && acc[o] && acc[o] + 1) || 1;
               return acc;
@@ -74,87 +76,110 @@ const hasWinningHand = (tiles, tile) => {
   });
 
   // need to check that each tile is between 0 and 4
-  // const tooManyPieces = Object.keys(counts).some((t) => {
-  //   return counts[t] < 0 || counts[t] > MAX_PIECES;
+  const tooManyPieces = Object.keys(counts).some((t) => {
+    return counts[t] < 0 || counts[t] > MAX_PIECES;
+  });
+
+  if (tooManyPieces) { return false; }
+
+  // check if a hand has seven pairs
+  // console.log(counts);
+  // const pairs = Object.keys(counts).filter((t) => {
+  //   return counts[t] >= PAIR_LEN;
   // });
-  //
-  // if (tooManyPieces) { return ''; }
-  //
-  // // check if a hand has seven pairs
-  // const hasSevenPairs = Object.keys(counts).length === 7;
-  // if (hasSevenPairs) { return true; }
-  //
-  // const buildThreeConsecutiveTiles = (combination, countsCopy) => {
-  //   for (let i = 1; i <= 7; i++) {
-  //     //console.log({countsCopy: countsCopy});
-  //     let sheungCombination = '';
-  //     for (let j = i; j <= 7; j++) {
-  //       while (countsCopy[j] >= 1 && countsCopy[j+1] >= 1 && countsCopy[j+2] >= 1) {
-  //         countsCopy[j] -= 1;
-  //         countsCopy[j+1] -= 1;
-  //         countsCopy[j+2] -= 1;
-  //         sheungCombination += `${j}${j+1}${j+2}`;
-  //       }
-  //     }
-  //     if ((combination.length + sheungCombination.length) === FOUR_MELDS_LEN) {
-  //       return combination + sheungCombination;
-  //     } else {
-  //       // restore value
-  //       sheungCombination.split('').forEach((t) => {
-  //         countsCopy[t] += 1;
-  //       });
-  //     }
-  //   }
-  //   return '';
+  // const hasSevenPairs = Object.keys(counts).length === 7
+  // if (hasSevenPairs) {
+  //   console.log('has seven pairs');
+  //   return true;
   // }
-  //
-  // const hasFourMelds = (counter) => {
-  //
-  //   // remove 3 identical pieces, from 0 to 4 groups
-  //   const pongList = Object.keys(counter)
-  //     .filter((t) => { return counter[t] >= IDENTICAL_PIECES; });
-  //
-  //   const countsCopy = JSON.parse(JSON.stringify(counter));
-  //   let combination = '', combo = null;
-  //
-  //   // can a winning hand be made without pong
-  //   let feasibleCombination = buildThreeConsecutiveTiles('', countsCopy);
-  //   if (feasibleCombination) { return feasibleCombination; }
-  //
-  //   if (pongList.length > 0) {
-  //     // try pong 1, 2, 3 and up to 4 times
-  //     const combos = PONG_COMBINATIONS[pongList.length];
-  //     for (let w = 0; w < combos.length; w++) {
-  //       combination = '';
-  //       combo = combos[w];
-  //       for (let k = 0; k < combo.length; k++) {
-  //         const tile = pongList[combo[k]];
-  //         countsCopy[tile] -= IDENTICAL_PIECES;
-  //         combination += `${tile}${tile}${tile}`;
-  //       }  // end combine pong
-  //
-  //      feasibleCombination = buildThreeConsecutiveTiles(combination, countsCopy);
-  //      if (feasibleCombination) { return feasibleCombination; }
-  //
-  //       if (combination) {
-  //         combination.split('').forEach((t) => {
-  //           countsCopy[t] += 1;
-  //         });
-  //       }
-  //     } // end loop combos
-  //     return '';
-  //   }
-  //   return '';
-  // }
-  //
-  // for (let i = 0; i < pairs.length; i++) {
-  //   counts[pairs[i]] -= PAIR_LEN;
-  //   const combination = hasFourMelds(counts);
-  //   if (combination) {
-  //     return true;
-  //   }
-  //   counts[pairs[i]] += PAIR_LEN;
-  // }
+
+  const buildThreeConsecutiveTiles = (combination, countsCopy) => {
+    for (let i = 1; i <= 7; i++) {
+      //console.log({countsCopy: countsCopy});
+      let sheungCombination = '';
+      for (let j = i; j <= 7; j++) {
+        for (let k = 0; k < SUITS.length; k++) {
+          const tile = `${j}${SUITS[k]}`;
+          const nextTile = `${j+1}${SUITS[k]}`;
+          const lastTile = `${j+2}${SUITS[k]}`;
+          //console.log({tile: tile, nextTile: nextTile, lastTile: lastTile});
+          while (countsCopy[tile] >= 1 && countsCopy[nextTile] >= 1 && countsCopy[lastTile] >= 1) {
+            countsCopy[tile] -= 1;
+            countsCopy[nextTile] -= 1;
+            countsCopy[lastTile] -= 1;
+            if (sheungCombination > '') { sheungCombination += ' '; }
+            sheungCombination += `${tile} ${nextTile} ${lastTile}`;
+          }
+        }
+      }
+      const final_hand = `${combination} ${sheungCombination}`.trim();
+      //console.log({ final_hand: final_hand });
+      if (final_hand.split(' ').length === FOUR_MELDS_LEN) {
+        return final_hand;
+      } else {
+        // restore value
+        sheungCombination.split(' ').forEach((tile) => {
+          countsCopy[tile] += 1;
+        });
+      }
+    }
+    return '';
+  }
+
+  const hasFourMelds = (counter) => {
+
+    // remove 3 identical pieces, from 0 to 4 groups
+    const pongList = Object.keys(counter)
+      .filter((t) => { return counter[t] >= IDENTICAL_PIECES; });
+
+    const countsCopy = JSON.parse(JSON.stringify(counter));
+    let pong = '', combo = null;
+
+    // can a winning hand be made without pong
+    let feasibleCombination = buildThreeConsecutiveTiles('', countsCopy);
+    if (feasibleCombination) {
+      console.log(feasibleCombination);
+      return feasibleCombination;
+    }
+
+    if (pongList.length > 0) {
+      // try pong 1, 2, 3 and up to 4 times
+      const combos = PONG_COMBINATIONS[pongList.length];
+      for (let w = 0; w < combos.length; w++) {
+        pong = '';
+        combo = combos[w];
+        for (let k = 0; k < combo.length; k++) {
+          const tile = pongList[combo[k]];
+          countsCopy[tile] -= IDENTICAL_PIECES;
+          if (pong > '') { pong += ' '; }
+          pong += `${tile} ${tile} ${tile}`;
+        }  // end combine pong
+        console.log({pong: pong});
+        feasibleCombination = buildThreeConsecutiveTiles(pong, countsCopy);
+        if (feasibleCombination) {
+          console.log(feasibleCombination);
+          return feasibleCombination;
+        }
+
+        if (pong) {
+          pong.split(' ').forEach((t) => {
+            countsCopy[t] += 1;
+          });
+        }
+      } // end loop combos
+      return '';
+    }
+    return '';
+  }
+
+  for (let i = 0; i < pairs.length; i++) {
+    counts[pairs[i]] -= PAIR_LEN;
+    const combination = hasFourMelds(counts);
+    if (combination) {
+      return true;
+    }
+    counts[pairs[i]] += PAIR_LEN;
+  }
   return false;
 }
 
@@ -164,16 +189,19 @@ const solution = (tiles) => {
   // when done, return result
   let result = '';
   '123456789'.split('').forEach((i) => {
-    ['p', 'm', 's'].forEach((suit) => {
-      if (hasWinningHand(tiles, `${i}${suit}`)) {
-        result += i;
+    SUITS.forEach((suit) => {
+      const tile = `${i}${suit}`;
+      if (hasWinningHand(tiles, tile)) {
+        if (result > '') { result += ' '; }
+        result += tile;
       }
     });
   });
   // check honor tiles
   '1z 2z 3z 4z 5z 6z 7z'.split(' ').forEach((tile) => {
     if (hasWinningHand(tiles, tile)) {
-      result += i;
+      if (result > '') { result += ' '; }
+      result += tile;
     }
   });
   return result;
@@ -186,8 +214,8 @@ const cases = [
 
 cases.forEach((o) => {
   const [hand, expected] = o;
-  console.log(solution(hand) === expected);
-
+  console.log(solution(hand));
+//  console.log(solution(hand) === expected);
 })
 // 111 123 234 567 88
 //
