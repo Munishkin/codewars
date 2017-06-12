@@ -92,35 +92,37 @@ const hasWinningHand = (tiles, tile) => {
   //   console.log('has seven pairs');
   //   return true;
   // }
+  const restoreCount = (counts, hand) => {
+    // restore value
+    if (hand) {
+      hand.split(' ').forEach((tile) => {
+        counts[tile] += 1;
+      });
+    }
+  };
 
   const buildThreeConsecutiveTiles = (combination, countsCopy) => {
     for (let i = 1; i <= 7; i++) {
-      //console.log({countsCopy: countsCopy});
       let sheungCombination = '';
       for (let j = i; j <= 7; j++) {
         for (let k = 0; k < SUITS.length; k++) {
           const tile = `${j}${SUITS[k]}`;
           const nextTile = `${j+1}${SUITS[k]}`;
           const lastTile = `${j+2}${SUITS[k]}`;
-          //console.log({tile: tile, nextTile: nextTile, lastTile: lastTile});
           while (countsCopy[tile] >= 1 && countsCopy[nextTile] >= 1 && countsCopy[lastTile] >= 1) {
             countsCopy[tile] -= 1;
             countsCopy[nextTile] -= 1;
             countsCopy[lastTile] -= 1;
-            if (sheungCombination > '') { sheungCombination += ' '; }
-            sheungCombination += `${tile} ${nextTile} ${lastTile}`;
+            sheungCombination += `${(sheungCombination > '' ? ' ' : '')}${tile} ${nextTile} ${lastTile}`;
           }
         }
       }
-      const final_hand = `${combination} ${sheungCombination}`.trim();
-      //console.log({ final_hand: final_hand });
+      const final_hand = `${combination} ${sheungCombination}`;
       if (final_hand.split(' ').length === FOUR_MELDS_LEN) {
         return final_hand;
       } else {
         // restore value
-        sheungCombination.split(' ').forEach((tile) => {
-          countsCopy[tile] += 1;
-        });
+        restoreCount(countsCopy, sheungCombination);
       }
     }
     return '';
@@ -151,21 +153,15 @@ const hasWinningHand = (tiles, tile) => {
         for (let k = 0; k < combo.length; k++) {
           const tile = pongList[combo[k]];
           countsCopy[tile] -= IDENTICAL_PIECES;
-          if (pong > '') { pong += ' '; }
-          pong += `${tile} ${tile} ${tile}`;
+          pong += `${(pong > '' ? ' ' : '')}${tile} ${tile} ${tile}`;
         }  // end combine pong
-        console.log({pong: pong});
         feasibleCombination = buildThreeConsecutiveTiles(pong, countsCopy);
         if (feasibleCombination) {
           console.log(feasibleCombination);
           return feasibleCombination;
         }
-
-        if (pong) {
-          pong.split(' ').forEach((t) => {
-            countsCopy[t] += 1;
-          });
-        }
+        // restore value
+        restoreCount(countsCopy, pong);
       } // end loop combos
       return '';
     }
@@ -193,15 +189,14 @@ const solution = (tiles) => {
       const tile = `${i}${suit}`;
       if (hasWinningHand(tiles, tile)) {
         if (result > '') { result += ' '; }
-        result += tile;
+        result += `${(result > '' ? ' ' : '')}${tile}`;
       }
     });
   });
   // check honor tiles
   '1z 2z 3z 4z 5z 6z 7z'.split(' ').forEach((tile) => {
     if (hasWinningHand(tiles, tile)) {
-      if (result > '') { result += ' '; }
-      result += tile;
+      result += `${(result > '' ? ' ' : '')}${tile}`;
     }
   });
   return result;
@@ -217,10 +212,3 @@ cases.forEach((o) => {
   console.log(solution(hand));
 //  console.log(solution(hand) === expected);
 })
-// 111 123 234 567 88
-//
-// 111 123 234 678 88
-//
-// 11 123 123 456 788
-
-//123
