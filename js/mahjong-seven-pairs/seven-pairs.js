@@ -40,6 +40,7 @@ const IDENTICAL_PIECES = 3;
 const PAIR_LEN = 2;
 const MAX_PIECES = 4;
 const SEVEN_PAIRS = 7;
+const PONG_WIN = 4;
 
 const PONG_COMBINATIONS = {
   1: [ [0] ],
@@ -113,6 +114,13 @@ const hasWinningHand = (tiles, tile, suits) => {
       if (feasibleCombination) {
         return feasibleCombination;
       }
+    }
+
+    // already a winning hand
+    if (pongList.length === PONG_WIN) {
+      return pongList.map((t) => {
+        return `${tile} ${tile} ${tile}`
+      }).join(' ');
     }
 
     if (pongList.length > 0) {
@@ -213,14 +221,15 @@ const cases = [
   ["4p 4p 4p 4s 4s 4s 3m 3m 3m 4m 3z 3z 3z", "2m 4m 5m"],
   ["5p 5p 5p 6p 6p 9p 9p 9p 7s 8s 9s 3m 3m", "6p 3m"],
   ["1p 2p 3p 5s 5s 5s 6s 6s 7s 7s 8s 8s 9s", "4s 6s 7s 9s"],
-  ["1p 1p 1p 3s 3s 3s 5s 5s 4m 5m 6m 5z 5z", "5s 5z"]
+  ["1p 1p 1p 3s 3s 3s 5s 5s 4m 5m 6m 5z 5z", "5s 5z"],
+  ["1p 1p 1p 3s 3s 3s 5s 5s 5s 6s 6s 6s 5z", "5z"]
 ];
 
 cases.forEach((o) => {
   const [hand, expected] = o;
   const startTime = new Date().getTime();
-  //console.log(solution(hand) === expected);
-  console.log(solution(hand))
+  console.log(solution(hand) === expected);
+  //console.log(solution(hand))
   const endTime = new Date().getTime();
   console.log(endTime - startTime);
 })
