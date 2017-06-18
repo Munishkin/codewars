@@ -74,3 +74,4 @@ console.log(properFractions(20) === 8 );
 console.log(properFractions(9999999) === 6637344);
 console.log(properFractions(10) === 4);
 console.log(properFractions(1234567890 ) === 329040288);
+console.log(properFractions(9999999999 ) === 5890320000);
