@@ -183,6 +183,7 @@ const solution = (tiles) => {
   if (tiles.indexOf('m') >= 0) {
     suits.push('m');
   }
+  const hasHonorTile = tiles.indexOf('z') >= 0;
   suits.forEach((suit) => {
     '123456789'.split('').forEach((i) => {
       const tile = `${i}${suit}`;
@@ -192,15 +193,15 @@ const solution = (tiles) => {
       }
     });
   });
-  //const hasHonorTile = tiles.indexOf('z') >= 0;
-  //if (hasHonorTile) {
-  for (let i = 1; i <= 7; i++) {
-    // check honor tiles
-    const tile = `${i}z`;
-    const numPiece = tilesArray.filter((t) => { return t === tile; }).length;
-    if (numPiece >= 1 && numPiece < MAX_PIECES) {
-      if (hasWinningHand(tiles, tile, suits)) {
-        result += `${(result > '' ? ' ' : '')}${tile}`;
+  if (hasHonorTile) {
+    for (let i = 1; i <= 7; i++) {
+      // check honor tiles
+      const tile = `${i}z`;
+      const numPiece = tilesArray.filter((t) => { return t === tile; }).length;
+      if (numPiece >= 1 && numPiece < MAX_PIECES) {
+        if (hasWinningHand(tiles, tile, suits)) {
+          result += `${(result > '' ? ' ' : '')}${tile}`;
+        }
       }
     }
   }
@@ -217,7 +218,9 @@ const cases = [
   ["5p 5p 5p 6p 6p 9p 9p 9p 7s 8s 9s 3m 3m", "6p 3m"],
   ["1p 2p 3p 5s 5s 5s 6s 6s 7s 7s 8s 8s 9s", "4s 6s 7s 9s"],
   ["1p 1p 1p 3s 3s 3s 5s 5s 4m 5m 6m 5z 5z", "5s 5z"],
-  ["1p 1p 1p 3s 3s 3s 5s 5s 5s 6s 6s 6s 5z", "5z"]
+  ["1p 1p 1p 3s 3s 3s 5s 5s 5s 6s 6s 6s 5z", "5z"],
+  ["1p 1p 1p 3p 4p 5p 5p 7p 3s 3s 8s 8s 8s", "6p"],
+  ["3p 4p 5p 6p 7p 3s 4s 5s 1m 2m 3m 2z 2z","2p 5p 8p"]
 ];
 
 cases.forEach((o) => {
@@ -228,3 +231,5 @@ cases.forEach((o) => {
   const endTime = new Date().getTime();
   console.log(endTime - startTime);
 })
+
+console.log(solution("5p 6p 3s 3s 5s 7s 7s 9s 9s 7m 2z 5z 7z"));
