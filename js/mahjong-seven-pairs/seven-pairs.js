@@ -45,9 +45,7 @@ const PONG_WIN = 4;
 const PONG_COMBINATIONS = {
   1: [ [0] ],
   2: [ [0], [1], [0, 1]],
-  3: [ [0], [1], [2], [0, 1], [0, 2], [1, 2], [0, 1, 2]],
-  4: [ [0], [1], [2], [3], [0,1], [0,2], [0,3],[1,2],[1,3],[2,3],
-       [0,1,2],[0,1,3],[0,2,3],[1,2,3], [0, 1, 2, 3] ]
+  3: [ [0], [1], [2], [0, 1], [0, 2], [1, 2], [0, 1, 2]]
 }
 
 const hasWinningHand = (tiles, tile, suits) => {
@@ -156,12 +154,6 @@ const hasWinningHand = (tiles, tile, suits) => {
     return counts[t] >= PAIR_LEN;
   });
 
-  // need to check that each tile is between 0 and 4
-  const tooManyPieces = Object.keys(counts).some((t) => {
-    return counts[t] < 0 || counts[t] > MAX_PIECES;
-  });
-  if (tooManyPieces) { return false; }
-
   if (hasSevenPairs(counts)) { return true; }
   const hasHonorTile = hand.indexOf('z') >= 0;
 
@@ -178,6 +170,7 @@ const solution = (tiles) => {
   // if hand is a winning hand, then append tile to result
   // when done, return result
   console.log(tiles);
+  const tilesArray = tiles.split(' ');
   //const startTime = new Date().getTime();
   let result = '';
   const suits = [];
@@ -193,7 +186,8 @@ const solution = (tiles) => {
   suits.forEach((suit) => {
     '123456789'.split('').forEach((i) => {
       const tile = `${i}${suit}`;
-      if (hasWinningHand(tiles, tile, suits)) {
+      const validPiece = tilesArray.filter((t) => { return t === tile; }).length < MAX_PIECES;
+      if (validPiece && hasWinningHand(tiles, tile, suits)) {
         result += `${(result > '' ? ' ' : '')}${tile}`;
       }
     });
@@ -203,7 +197,8 @@ const solution = (tiles) => {
   for (let i = 1; i <= 7; i++) {
     // check honor tiles
     const tile = `${i}z`;
-    if (tiles.indexOf(tile) >= 0) {
+    const numPiece = tilesArray.filter((t) => { return t === tile; }).length;
+    if (numPiece >= 1 && numPiece < MAX_PIECES) {
       if (hasWinningHand(tiles, tile, suits)) {
         result += `${(result > '' ? ' ' : '')}${tile}`;
       }
