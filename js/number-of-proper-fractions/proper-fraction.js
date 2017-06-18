@@ -67,28 +67,36 @@ const isPrime = (n) => {
 }
 
 const properFractions = (n) => {
-  //console.log(n);
+  const start = new Date().getTime();
+  console.log(n);
   if (n === 1) { return 0; }
   if (isPrime(n)) { return n - 1; }
   let count = 1;   // 1 / n is always reduced fraction
   //const divisors = findDivisors(n);
+  //console.log(divisors);
   //const isOdd = n % 2 === 1;
   const strN = `${n}`;
   for (let i = 2; i < n; i++) {
+    if (i % 2 === 0 && n % 2 === 0) { continue; }
     // both even numbers are divisble by 2, not reduced fraction
-    const r = reduceGCD(strN, i);
-//    console.log({r: r});
-    const result = gcd(i, r);
-    // reduced
+    const result = gcd(reduceGCD(strN, i), i);
     if (result === 1) {
-      //console.log({r: r, i: i});
       count++;
     }
   }
+  const end = new Date().getTime();
+  console.log(end - start);
   return count;
 }
 
-console.log(properFractions(3)==2);
+// try division method
+
+
+//const x = reduceGCD('9999999999', 9999999997);
+//console.log(x);
+//console.log(gcd(x, 9999999997));
+
+/*console.log(properFractions(3)==2);
 console.log(properFractions(1)==0);
 console.log(properFractions(2)==1);
 console.log(properFractions(5)==4);
@@ -97,10 +105,10 @@ console.log(properFractions(25)==20);
 console.log(properFractions(500000003) === 500000002);
 console.log(properFractions(21) == 12 );
 console.log(properFractions(20) == 8 );
+console.log(properFractions(9999999));*/
+//console.log(properFractions(9999999999));
 
-
-console.log(properFractions(9999999));
-console.log(properFractions(9999999999));
-
-
-//console.log(findDivisors(9999999));
+//console.log(gcd(9999999999, 9999999997));
+console.log(9999999999 % 9999999997);
+console.log(9999999997 % 2);
+console.log(2 % 1);
