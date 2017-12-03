@@ -18,6 +18,24 @@ function frequencies(s) {
   }
 }
 
+function buildTree(freqs) {
+  if (freqs == null || typeof freqs === 'undefined' || freqs.length <= 1) {
+    return null;
+  }
+
+  let queue = JSON.parse(JSON.stringify(freqs))
+                .sort((a,b) => b[1] - a[1]);
+  while (queue.length !== 1) {
+    const [right, left] = queue.splice(-2);
+    const internalNode = [ `${left[0]}${right[0]}`, left[1] + right[1], left, right];
+    queue.push(internalNode);
+    queue = queue.sort((a,b) => {
+              return b[1] - a[1];
+            });
+  }
+  return queue[0];
+}
+
 // takes: [ [String,Int] ], String; returns: String (with "0" and "1")
 function encode(freqs,s) {
   function findBit(bitTree, symbol) {
@@ -48,19 +66,7 @@ function encode(freqs,s) {
   if (freqs == null || typeof freqs === 'undefined' || freqs.length <= 1) {
     return null;
   }
-
-  let queue = JSON.parse(JSON.stringify(freqs))
-                .sort((a,b) => b[1] - a[1]);
-// [ 'symbol', frequency, left node, right node]
-  while (queue.length !== 1) {
-    const [right, left] = queue.splice(-2);
-    const internalNode = [ `${left[0]}${right[0]}`, left[1] + right[1], left, right];
-    queue.push(internalNode);
-    queue = queue.sort((a,b) => {
-              return b[1] - a[1];
-            });
-  }
-  const tree = queue[0];
+  const tree = buildTree(freqs);
   // encode the symbol in the tree
   const bitTree = encodeTree(tree);
   // find encoded value
