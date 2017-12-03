@@ -3,7 +3,16 @@ function frequencies(s) {
   if (s.length <= 1) {
     return null;
   } else {
-    
+    const freqTable = s.split('').reduce((acc, e) => {
+          acc[e] = !acc[e] ? 1 : acc[e] + 1;
+          return acc;
+      }, {});
+
+    return Object.keys(freqTable).map(k => {
+          return [k, freqTable[k]];
+      }).sort((a, b) => {
+        return b[1] - a[1];
+      });
   }
 }
 
@@ -17,6 +26,9 @@ function decode(freqs,bits) {
 
 }
 
+const s = "baaaacc";
+const fs = frequencies(s);
+console.log(fs);
 
 // describe("example tests", ()=>{
 //   const s = "aaaabcc";
