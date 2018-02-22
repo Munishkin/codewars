@@ -4,7 +4,6 @@ const parseClocks = (clocks) => {
   let handPos = [];
   while (rowIdx < 17) {
     let colIdx = 0;
-    //const handPosRow = [];
     while (colIdx < 39) {
       if (lines[rowIdx+1][colIdx+4] === '|') {
         handPos.push(0);
@@ -41,19 +40,7 @@ const rotateClocks = (clocks,turns) => {
   });
 
   const nestedHandPos = [ handPos.slice(0, 3), handPos.slice(3, 6), handPos.slice(6, 9)];
-  let newHands = [
-'+-------+    +-------+    +-------+',
-'|       |    |       |    |       |',
-'|   O   |    |   O   |    |   O   |',
-'|       |    |       |    |       |',
-'+-------+    +-------+    +-------+',
-'                                   ',
-'+-------+    +-------+    +-------+',
-'|       |    |       |    |       |',
-'|   O   |    |   O   |    |   O   |',
-'|       |    |       |    |       |',
-'+-------+    +-------+    +-------+',
-'                                   ',
+  let noHands = [
 '+-------+    +-------+    +-------+',
 '|       |    |       |    |       |',
 '|   O   |    |   O   |    |   O   |',
@@ -61,31 +48,32 @@ const rotateClocks = (clocks,turns) => {
 '+-------+    +-------+    +-------+'
 ];
 
-  const drawHand = (initClock, h, rowIdx, colIdx) => {
-    let row = null;
+  const drawHand = (clocks, h, colIdx) => {
     if (h === 0) {
-      row = initClock[rowIdx+1];
-      initClock[rowIdx+1] = `${row.substring(0, colIdx + 4)}|${row.substring(colIdx + 5)}`;
+      clocks[1] = `${clocks[1].substring(0, colIdx + 4)}|${clocks[1].substring(colIdx + 5)}`;
     } else if (h === 9) {
-      row = initClock[rowIdx+2];
-      initClock[rowIdx+2] = `${row.substring(0, colIdx + 1)}---${row.substring(colIdx + 4)}`;
+      clocks[2] = `${clocks[2].substring(0, colIdx + 1)}---${clocks[2].substring(colIdx + 4)}`;
     } else if (h === 3) {
-      row = initClock[rowIdx+2];
-      initClock[rowIdx+2] = `${row.substring(0, colIdx + 5)}---${row.substring(colIdx + 8)}`;
+      clocks[2] = `${clocks[2].substring(0, colIdx + 5)}---${clocks[2].substring(colIdx + 8)}`;
     } else if (h === 6) {
-      row = initClock[rowIdx+3];
-      initClock[rowIdx+3] = `${row.substring(0, colIdx + 4)}|${row.substring(colIdx + 5)}`;
+      clocks[3] = `${clocks[3].substring(0, colIdx + 4)}|${clocks[3].substring(colIdx + 5)}`;
     }
+    return clocks;
   };
 
+  let results = [];
   nestedHandPos.forEach(([a,b,c], i) => {
-    console.log(i);
-    drawHand(newHands, a, 6 * i, 0);
-    drawHand(newHands, b, 6 * i, 13);
-    drawHand(newHands, c, 6 * i, 26);
+    let newHands = JSON.parse(JSON.stringify(noHands));
+    drawHand(newHands, a, 0);
+    drawHand(newHands, b, 13);
+    drawHand(newHands, c, 26);
+    if (i < nestedHandPos.length - 1) {
+      newHands.push('                                   ');
+    }
+    results = results.concat(newHands);
   })
 
-  return newHands.join('\n');
+  return results.join('\n');
 }
 
 const clocks1 =
